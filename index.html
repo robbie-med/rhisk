@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCCP 2019 Risk-Based Management Calculator</title>
+    <meta name="description" content="Evidence-based cervical cancer screening risk assessment following ASCCP 2019 Risk-Based Management Consensus Guidelines">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="header-title">ASCCP Risk Calculator</h1>
+                    <p class="header-subtitle">2019 Risk-Based Management Guidelines</p>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <svg class="sun-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v6m0 6v6m-9-9h6m6 0h6m-5.636-6.364l4.243 4.243M7.757 16.243l4.243 4.243m0-12.728l-4.243 4.243m4.243 4.243l4.243 4.243"/>
+                    </svg>
+                    <svg class="moon-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Progress Indicator -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <div class="progress-step active" data-step="1">
+                            <div class="step-circle">1</div>
+                            <div class="step-label">Current Results</div>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                            <div class="step-circle">2</div>
+                            <div class="step-label">History</div>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                            <div class="step-circle">3</div>
+                            <div class="step-label">Risk Factors</div>
+                        </div>
+                        <div class="progress-step" data-step="4">
+                            <div class="step-circle">4</div>
+                            <div class="step-label">Results</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Content -->
+                <form id="riskForm" novalidate>
+                    <!-- Step 1: Current Test Results -->
+                    <div class="form-step active" data-step="1">
+                        <h2>Current Test Results & Demographics</h2>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="age">Patient Age <span class="required">*</span></label>
+                                <input type="number" id="age" name="age" min="21" max="100" required>
+                                <span class="error-message"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="screeningType">Screening Type <span class="required">*</span></label>
+                                <select id="screeningType" name="screeningType" required>
+                                    <option value="">Select screening type</option>
+                                    <option value="routine">Routine Screening</option>
+                                    <option value="surveillance">Surveillance (prior abnormal)</option>
+                                    <option value="post-treatment">Post-Treatment Follow-up</option>
+                                    <option value="symptomatic">Symptomatic Evaluation</option>
+                                </select>
+                                <span class="error-message"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="cytology">Cytology Result <span class="required">*</span></label>
+                                <select id="cytology" name="cytology" required>
+                                    <option value="">Select cytology result</option>
+                                    <option value="NILM">NILM (Negative)</option>
+                                    <option value="ASC-US">ASC-US</option>
+                                    <option value="ASC-H">ASC-H</option>
+                                    <option value="LSIL">LSIL</option>
+                                    <option value="HSIL">HSIL</option>
+                                    <option value="AGC">AGC</option>
+                                    <option value="AGC-favor-neoplasia">AGC, favor neoplasia</option>
+                                    <option value="AIS">AIS</option>
+                                    <option value="unsatisfactory">Unsatisfactory</option>
+                                    <option value="absent-transformation-zone">NILM, absent transformation zone</option>
+                                </select>
+                                <span class="error-message"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="hpvResult">HPV Test Result <span class="required">*</span></label>
+                                <select id="hpvResult" name="hpvResult" required>
+                                    <option value="">Select HPV result</option>
+                                    <option value="not-done">Not performed</option>
+                                    <option value="negative">HPV Negative</option>
+                                    <option value="positive-16">HPV 16 Positive</option>
+                                    <option value="positive-18">HPV 18 Positive</option>
+                                    <option value="positive-16-18">HPV 16 and 18 Positive</option>
+                                    <option value="positive-other-hr">Other HR-HPV Positive (not 16/18)</option>
+                                    <option value="positive-unknown">HPV Positive (genotype unknown)</option>
+                                </select>
+                                <span class="error-message"></span>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <p><strong>Note:</strong> HPV testing with genotyping is preferred for optimal risk stratification. If genotyping is not available, select "HPV Positive (genotype unknown)".</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Screening History -->
+                    <div class="form-step" data-step="2">
+                        <h2>Screening & Colposcopy History</h2>
+                        
+                        <div class="form-group">
+                            <label for="priorHpvNegative">Most Recent Negative HPV Test</label>
+                            <select id="priorHpvNegative" name="priorHpvNegative">
+                                <option value="none">No prior negative HPV test/Unknown</option>
+                                <option value="within-1-year">Within 1 year</option>
+                                <option value="1-5-years">1-5 years ago</option>
+                                <option value="over-5-years">Over 5 years ago</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priorAbnormalResults">Previous Abnormal Results (Check all that apply)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="priorAbnormal" value="ASC-US">
+                                    <span>ASC-US</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="priorAbnormal" value="LSIL">
+                                    <span>LSIL</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="priorAbnormal" value="ASC-H">
+                                    <span>ASC-H</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="priorAbnormal" value="HSIL">
+                                    <span>HSIL</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="priorAbnormal" value="AGC">
+                                    <span>AGC</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="priorAbnormal" value="HPV-positive">
+                                    <span>HPV Positive</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="recentColposcopy">Recent Colposcopy (within 12 months)</label>
+                            <select id="recentColposcopy" name="recentColposcopy">
+                                <option value="none">No recent colposcopy</option>
+                                <option value="negative">Yes - No CIN found</option>
+                                <option value="cin1">Yes - CIN1 found</option>
+                                <option value="inadequate">Yes - Inadequate examination</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="biopsyHistory">Highest Grade Previously Found on Biopsy</label>
+                            <select id="biopsyHistory" name="biopsyHistory">
+                                <option value="none">No prior biopsy</option>
+                                <option value="normal">Normal/Benign</option>
+                                <option value="cin1">CIN1</option>
+                                <option value="cin2">CIN2</option>
+                                <option value="cin3">CIN3</option>
+                                <option value="ais">AIS</option>
+                                <option value="cancer">Invasive cancer</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="treatmentHistory">Previous Treatment</label>
+                            <select id="treatmentHistory" name="treatmentHistory">
+                                <option value="none">No prior treatment</option>
+                                <option value="excision">Excisional procedure (LEEP/Cone)</option>
+                                <option value="ablation">Ablative procedure</option>
+                                <option value="hysterectomy">Hysterectomy for CIN</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="treatmentDateGroup" style="display:none;">
+                            <label for="treatmentDate">Date of Most Recent Treatment</label>
+                            <input type="date" id="treatmentDate" name="treatmentDate">
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Risk Factors -->
+                    <div class="form-step" data-step="3">
+                        <h2>Additional Risk Factors & Special Populations</h2>
+                        
+                        <div class="form-group">
+                            <label>Special Populations</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="pregnant" name="specialPopulation" value="pregnant">
+                                    <span>Currently pregnant</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="immunocompromised" name="specialPopulation" value="immunocompromised">
+                                    <span>Immunocompromised (HIV+, transplant, immunosuppressive therapy)</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="des-exposed" name="specialPopulation" value="des-exposed">
+                                    <span>In utero DES exposure</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="symptoms">Clinical Presentation</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="symptoms" value="postcoital-bleeding">
+                                    <span>Post-coital bleeding</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="symptoms" value="abnormal-bleeding">
+                                    <span>Abnormal uterine bleeding</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="symptoms" value="visible-lesion">
+                                    <span>Visible cervical lesion</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="additionalNotes">Additional Clinical Notes (Optional)</label>
+                            <textarea id="additionalNotes" name="additionalNotes" rows="3" placeholder="Any other relevant clinical information..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Results -->
+                    <div class="form-step" data-step="4">
+                        <h2>Risk Assessment & Management Recommendations</h2>
+                        
+                        <div id="resultsContent" style="display:none;">
+                            <!-- Risk Assessment Card -->
+                            <div class="risk-card" id="riskCard">
+                                <h3>CIN3+ Risk Assessment</h3>
+                                <div class="risk-value-container">
+                                    <div class="risk-value" id="immediateRisk">--%</div>
+                                    <div class="risk-label">Immediate Risk</div>
+                                </div>
+                                <div class="risk-category" id="riskCategory"></div>
+                                <div class="risk-bar">
+                                    <div class="risk-fill" id="riskFill"></div>
+                                    <div class="risk-markers">
+                                        <div class="risk-marker" style="left: 4%">
+                                            <div class="marker-line"></div>
+                                            <div class="marker-label">4%</div>
+                                        </div>
+                                        <div class="risk-marker" style="left: 25%">
+                                            <div class="marker-line"></div>
+                                            <div class="marker-label">25%</div>
+                                        </div>
+                                        <div class="risk-marker" style="left: 60%">
+                                            <div class="marker-line"></div>
+                                            <div class="marker-label">60%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="five-year-risk" id="fiveYearRiskSection" style="display:none;">
+                                    <div class="risk-value-small" id="fiveYearRisk">--%</div>
+                                    <div class="risk-label">5-Year Risk</div>
+                                </div>
+                            </div>
+
+                            <!-- Management Recommendation -->
+                            <div class="recommendation-card">
+                                <h3>Management Recommendation</h3>
+                                <div class="recommendation-primary" id="primaryRecommendation"></div>
+                                <div class="recommendation-details" id="recommendationDetails"></div>
+                                <div class="special-considerations" id="specialConsiderations" style="display:none;"></div>
+                            </div>
+
+                            <!-- Clinical Summary -->
+                            <div class="summary-card">
+                                <h3>Clinical Summary</h3>
+                                <div class="summary-grid" id="clinicalSummary"></div>
+                            </div>
+
+                            <!-- Copy to Clipboard Section -->
+                            <div class="clipboard-card">
+                                <h3>Documentation for Medical Record</h3>
+                                <div class="clipboard-content" id="clipboardContent"></div>
+                                <button type="button" class="btn btn-secondary" onclick="copyToClipboard()">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="8" height="8" rx="1"/>
+                                        <path d="M5 7a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2V7z"/>
+                                    </svg>
+                                    Copy to Clipboard
+                                </button>
+                            </div>
+
+                            <!-- References -->
+                            <div class="references-card">
+                                <h3>References</h3>
+                                <ol>
+                                    <li>Perkins RB, Guido RS, Castle PE, et al. 2019 ASCCP Risk-Based Management Consensus Guidelines for Abnormal Cervical Cancer Screening Tests and Cancer Precursors. J Low Genit Tract Dis. 2020;24(2):102-131.</li>
+                                    <li>Egemen D, Cheung LC, Chen X, et al. Risk Estimates Supporting the 2019 ASCCP Risk-Based Management Consensus Guidelines. J Low Genit Tract Dis. 2020;24(2):132-143.</li>
+                                    <li>Massad LS, Einstein MH, Huh WK, et al. 2012 updated consensus guidelines for the management of abnormal cervical cancer screening tests and cancer precursors. J Low Genit Tract Dis. 2013;17(5 Suppl 1):S1-S27.</li>
+                                    <li>Schiffman M, Wentzensen N, Perkins RB, Guido RS. An Introduction to the 2019 ASCCP Risk-Based Management Consensus Guidelines. J Low Genit Tract Dis. 2020;24(2):87-89.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loadingResults" style="display:none;">
+                            <div class="loading-spinner"></div>
+                            <p>Calculating risk assessment...</p>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button type="button" class="btn btn-secondary" id="prevBtn" onclick="previousStep()" style="display:none;">
+                        Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                        Continue
+                    </button>
+                    <button type="button" class="btn btn-primary" id="calculateBtn" onclick="calculateRisk()" style="display:none;">
+                        Calculate Risk
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="resetBtn" onclick="resetForm()" style="display:none;">
+                        Start New Assessment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclaimer">
+                <p><strong>Medical Disclaimer:</strong> This tool implements the 2019 ASCCP Risk-Based Management Consensus Guidelines for educational and clinical decision support purposes only. It should not replace clinical judgment, and individual patient factors should always be considered. Results should be interpreted by qualified healthcare providers in the context of the complete clinical picture.</p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>Made by <a href="https://robbiemed.org" target="_blank" rel="noopener">robbie.med</a> | <a href="https://robbiemed.org" target="_blank" rel="noopener">Contact Me</a> | SDG 2025</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
