@@ -602,35 +602,79 @@ function formatHPVResult(result) {
 
 function generateDocumentation(results) {
     const data = results.formData;
-    const date = new Date().toLocaleDateString();
     
-    let documentation = `CERVICAL CANCER SCREENING RISK ASSESSMENT - ${date}
-
-Patient: ${data.age} year old ${data.specialPopulation && data.specialPopulation.includes('pregnant') ? 'pregnant ' : ''}${data.specialPopulation && data.specialPopulation.includes('immunocompromised') ? 'immunocompromised ' : ''}female
-
-Current Results:
-- Cytology: ${data.cytology}
-- HPV: ${formatHPVResult(data.hpvResult)}
-
-Relevant History:
-- Prior negative HPV: ${formatValue(data.priorHpvNegative || 'none')}
-- Recent colposcopy: ${formatValue(data.recentColposcopy || 'none')}
-- Prior treatment: ${formatValue(data.treatmentHistory || 'none')}
-
-Risk Assessment per ASCCP 2019 Guidelines:
-- Immediate CIN3+ risk: ${results.immediateRisk.toFixed(1)}%${results.fiveYearRisk !== undefined ? '\n- 5-year CIN3+ risk: ' + results.fiveYearRisk.toFixed(2) + '%' : ''}
-- Risk category: ${results.riskCategory.toUpperCase()}
-
-Management Plan:
-${results.management}
-
-Clinical Rationale:
-${results.details}
-
-${results.specialConsiderations.length > 0 ? 'Additional Considerations:\n' + results.specialConsiderations.map(item => '- ' + item).join('\n') + '\n' : ''}
-Follow-up: As per ASCCP 2019 risk-based management guidelines`;
+    // Format cytology/HPV concisely
+    const cytoHPV = `${data.cytology}/${formatHPVShort(data.hpvResult)}`;
+    
+    // Build concise patient description
+    let ptDescription = `${data.age}yo`;
+    if (data.specialPopulation && data.specialPopulation.includes('pregnant')) ptDescription += ' pregnant';
+    if (data.specialPopulation && data.specialPopulation.includes('immunocompromised')) ptDescription += ' immunocompromised';
+    ptDescription += ' F';
+    
+    // Format history concisely
+    let history = [];
+    if (data.priorHpvNegative && data.priorHpvNegative !== 'none') {
+        history.push(`prior HPV(-) ${data.priorHpvNegative.replace('within-', '<').replace('-years', 'y')}`);
+    }
+    if (data.recentColposcopy && data.recentColposcopy !== 'none') {
+        history.push(`recent colpo: ${data.recentColposcopy === 'negative' ? 'neg' : data.recentColposcopy}`);
+    }
+    if (data.treatmentHistory && data.treatmentHistory !== 'none') {
+        history.push(`s/p ${data.treatmentHistory === 'excision' ? 'LEEP/cone' : data.treatmentHistory}`);
+    }
+    
+    // Get specific follow-up timing
+    let followUp = '';
+    if (results.management.includes('Colposcopy')) {
+        followUp = 'colposcopy';
+    } else if (results.management.includes('Expedited treatment')) {
+        followUp = 'LEEP';
+    } else if (results.management.includes('1-year')) {
+        followUp = 'repeat HPV/Pap in 1y';
+    } else if (results.management.includes('3-year')) {
+        followUp = 'repeat HPV/Pap in 3y';
+    } else if (results.management.includes('5 years')) {
+        followUp = 'routine screening in 5y';
+    } else if (results.management.includes('6 months')) {
+        followUp = 'HPV test in 6mo';
+    } else if (results.management.includes('annual')) {
+        followUp = 'annual HPV testing x3, then q3y x25y';
+    }
+    
+    // Build the concise paragraph
+    let documentation = `${ptDescription} with ${cytoHPV}`;
+    if (history.length > 0) {
+        documentation += ` (${history.join(', ')})`;
+    }
+    documentation += `. Immediate CIN3+ risk ${results.immediateRisk.toFixed(1)}%`;
+    if (results.fiveYearRisk !== undefined && results.immediateRisk < 4) {
+        documentation += `, 5y risk ${results.fiveYearRisk.toFixed(1)}%`;
+    }
+    documentation += `. Plan: ${followUp} per ASCCP 2019.`;
+    
+    // Add critical special considerations only
+    if (data.specialPopulation && data.specialPopulation.includes('pregnant') && results.management.includes('Colposcopy')) {
+        documentation += ' No ECC in pregnancy.';
+    }
+    if ((data.cytology === 'AGC' || data.cytology === 'AGC-favor-neoplasia') && parseInt(data.age) >= 35) {
+        documentation += ' EMB indicated.';
+    }
     
     document.getElementById('clipboardContent').textContent = documentation;
+}
+
+function formatHPVShort(hpvResult) {
+    const shortMap = {
+        'not-done': 'HPV not done',
+        'negative': 'HPV(-)',
+        'positive-16': 'HPV16(+)',
+        'positive-18': 'HPV18(+)',
+        'positive-16-18': 'HPV16/18(+)',
+        'positive-other-hr': 'HPV(+) non-16/18',
+        'positive-unknown': 'HPV(+)'
+    };
+    return shortMap[hpvResult] || hpvResult;
 }
 
 function copyToClipboard() {
