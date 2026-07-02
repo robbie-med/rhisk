@@ -477,8 +477,6 @@ function displayResults(results) {
     } else {
         riskEl.textContent = '—';
     }
-    document.getElementById('immediateRiskLabel').textContent = 'Immediate CIN3+ Risk';
-
     // Category badge
     const catText = {
         'very-high': 'Very High Risk (≥60%)',
