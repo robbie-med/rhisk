@@ -101,8 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     document.getElementById('treatmentHistory').addEventListener('change', toggleTreatmentDate);
+    document.getElementById('clinicalSituation').addEventListener('change', toggleClinicalSituationFields);
+    document.getElementById('colpoBiopsy').addEventListener('change', toggleColpoBiopsyFields);
     addValidationListeners();
     updateProgressBar();
+    toggleClinicalSituationFields(); // initial state
 });
 
 function toggleTheme() {
@@ -119,7 +122,7 @@ function updateThemeIcon(isDark) {
 // --- Validation ---
 function addValidationListeners() {
     document.getElementById('age').addEventListener('input', validateAge);
-    ['screeningType', 'cytology', 'hpvResult'].forEach(id => {
+    ['clinicalSituation', 'cytology', 'hpvResult'].forEach(id => {
         document.getElementById(id).addEventListener('change', e => validateRequired(e));
     });
 }
@@ -157,7 +160,7 @@ function clearError(input) {
 function validateStep(step) {
     let ok = true;
     if (step === 1) {
-        ['age', 'screeningType', 'cytology', 'hpvResult'].forEach(id => {
+        ['age', 'clinicalSituation', 'cytology', 'hpvResult'].forEach(id => {
             const f = document.getElementById(id);
             if (!f.value) { showError(f, 'Required'); ok = false; }
             else if (id === 'age') {
@@ -219,6 +222,34 @@ function toggleTreatmentDate() {
         document.getElementById('treatmentHistory').value !== 'none' ? 'block' : 'none';
 }
 
+function toggleClinicalSituationFields() {
+    const sit = document.getElementById('clinicalSituation').value;
+    const isPostColpo = sit === 'post-colposcopy';
+    document.getElementById('postColposcopyFields').style.display = isPostColpo ? 'block' : 'none';
+    document.getElementById('standardHistoryFields').style.display = isPostColpo ? 'none' : 'block';
+    document.getElementById('step2Heading').textContent = isPostColpo
+        ? 'Post-Colposcopy Management' : 'Screening & Colposcopy History';
+    // Also toggle step 1 cytology/HPV fields — post-colpo still needs these for HPV status
+    const cytoLabel = document.querySelector('label[for="cytology"]');
+    if (cytoLabel) {
+        if (isPostColpo) {
+            cytoLabel.innerHTML = 'Current Cytology <span class="required">*</span>';
+            document.querySelector('label[for="hpvResult"]').innerHTML = 'Current HPV Result <span class="required">*</span>';
+        } else {
+            cytoLabel.innerHTML = 'Cytology Result <span class="required">*</span>';
+            document.querySelector('label[for="hpvResult"]').innerHTML = 'HPV Test Result <span class="required">*</span>';
+        }
+    }
+}
+
+function toggleColpoBiopsyFields() {
+    const biopsy = document.getElementById('colpoBiopsy').value;
+    document.getElementById('precedingCytologyGroup').style.display =
+        (biopsy === 'cin1') ? 'block' : 'none';
+    document.getElementById('excisionMarginsGroup').style.display =
+        (biopsy === 'cin2' || biopsy === 'cin3') ? 'block' : 'none';
+}
+
 function saveStepData() {
     const el = document.querySelector(`.form-step[data-step="${currentStep}"]`);
     el.querySelectorAll('input, select, textarea').forEach(input => {
@@ -257,6 +288,7 @@ function calculateRisk() {
 
 function performRiskCalculation() {
     const age = parseInt(formData.age);
+    const clinicalSituation = formData.clinicalSituation;
     const cytology = formData.cytology;
     const hpvResult = formData.hpvResult;
     const hasSymptoms = formData.symptoms && formData.symptoms.includes('visible-lesion');
@@ -264,6 +296,11 @@ function performRiskCalculation() {
     const isImmuno = formData.specialPopulation && formData.specialPopulation.includes('immunocompromised');
     const hasBeenTreated = formData.treatmentHistory !== 'none';
     const hasPriorNegHpv = formData.priorHpvNegative === 'within-1-year' || formData.priorHpvNegative === '1-5-years';
+
+    // Route to post-colposcopy management
+    if (clinicalSituation === 'post-colposcopy') {
+        return postColposcopyManagement(age, cytology, hpvResult, formData, isPregnant);
+    }
 
     // Select risk table
     const table = hasPriorNegHpv ? TABLE_PRIOR_NEG : TABLE_DEFAULT;
@@ -393,7 +430,7 @@ function performRiskCalculation() {
     }
 
     // Post-treatment surveillance
-    if (hasBeenTreated && formData.screeningType === 'post-treatment') {
+    if (hasBeenTreated && clinicalSituation === 'post-treatment') {
         const treatmentDate = formData.treatmentDate ? new Date(formData.treatmentDate) : null;
         const monthsSince = treatmentDate ? getMonthsDifference(treatmentDate, new Date()) : null;
         if (monthsSince !== null && monthsSince < 6) {
@@ -448,6 +485,144 @@ function performRiskCalculation() {
     if (isPregnant && management.includes('Colposcopy')) specialConsiderations.push('No ECC in pregnancy');
 
     return { immediateRisk: immediate, fiveYearRisk: fiveYear, riskCategory, management, details, specialConsiderations, formData };
+}
+
+// --- Post-Colposcopy Management (ASCCP 2019) ---
+function postColposcopyManagement(age, cytology, hpvResult, data, isPregnant) {
+    const biopsy = data.colpoBiopsy;
+    const margins = data.excisionMargins;
+    const precedingCyto = data.precedingCytology;
+    const hpvGroupVal = hpvGroup(hpvResult);
+
+    // Determine current HPV risk category
+    const hpvPositive = hpvGroupVal !== 'negative' && hpvGroupVal !== 'not-done';
+    const hpv16_18 = hpvGroupVal === '16-18';
+
+    const result = {
+        immediateRisk: null, fiveYearRisk: null,
+        riskCategory: '', management: '', details: '',
+        specialConsiderations: [], formData: data
+    };
+
+    if (!biopsy) {
+        result.management = 'Select colposcopy biopsy result';
+        result.details = 'Please select the colposcopy biopsy finding to continue.';
+        result.riskCategory = 'intermediate';
+        return result;
+    }
+
+    switch (biopsy) {
+        case 'negative':
+            // No CIN found. Management based on HPV.
+            if (!hpvPositive) {
+                result.management = 'Return to routine screening in 3 years';
+                result.details = 'Colposcopy negative for CIN, HPV negative. HPV-based testing in 3 years. If negative at 3 years, return to routine screening interval.';
+                result.riskCategory = 'low';
+            } else if (hpv16_18 && age >= 25) {
+                result.management = 'Colposcopy in 1 year with HPV testing';
+                result.details = 'Colposcopy negative but HPV 16/18 positive. Repeat colposcopy and HPV testing in 1 year due to elevated risk with HPV 16/18. If negative, then HPV test in 1 year.';
+                result.riskCategory = 'intermediate';
+            } else {
+                result.management = 'HPV-based testing in 1 year';
+                result.details = 'Colposcopy negative but HPV positive (non-16/18). Repeat HPV-based testing in 1 year. If negative at 1 year, return to age-appropriate screening. If positive, repeat colposcopy.';
+                result.riskCategory = 'intermediate';
+            }
+            break;
+
+        case 'cin1':
+            // CIN1: management depends on preceding cytology
+            if (precedingCyto === 'ASC-H-or-higher') {
+                result.management = 'Diagnostic excision OR observation with colposcopy + HPV at 1 year';
+                result.details = 'CIN1 preceded by ASC-H or HSIL cytology — higher risk of occult CIN2+. Options: diagnostic excisional procedure, OR observation with repeat colposcopy and HPV testing at 1 year. If observation and both tests negative at 1 year → HPV testing in 1 year. If either positive at 1 year → repeat colposcopy.';
+                result.riskCategory = 'high';
+            } else {
+                result.management = 'HPV-based testing in 1 year';
+                result.details = 'CIN1 preceded by <ASC-H cytology — low risk of progression. HPV-based testing in 1 year. If HPV negative → return to routine screening. If HPV positive (non-16/18) → repeat colposcopy. If HPV 16/18 positive → colposcopy recommended.';
+                result.riskCategory = 'intermediate';
+            }
+            if (isPregnant) {
+                result.specialConsiderations.push('CIN1 in pregnancy: defer re-evaluation until ≥4 weeks postpartum');
+            }
+            break;
+
+        case 'cin2':
+            // CIN2: age-dependent management
+            if (age < 25) {
+                result.management = 'Observation preferred (colposcopy + cytology every 6 months for up to 2 years)';
+                result.details = 'Age <25 with CIN2: observation is preferred. CIN2 has high spontaneous regression rate in this age group. Colposcopy + cytology every 6 months for up to 2 years. If CIN2 persists at 2 years or progresses to CIN3 → treatment. If HSIL or ASC-H on cytology during surveillance → repeat biopsy.';
+                result.riskCategory = 'intermediate';
+                result.specialConsiderations.push('Age <25: observation preferred for CIN2 (high regression rate)');
+                result.specialConsiderations.push('Avoid expedited treatment in this age group');
+            } else {
+                // Age ≥25: treatment recommended
+                if (margins === 'positive') {
+                    result.management = 'Treatment recommended (excision preferred) — margins were positive';
+                    result.details = 'Age ≥25 with CIN2 and positive margins: re-excision is recommended. Excisional procedure (LEEP/cone) preferred. Ablation only acceptable if entire squamocolumnar junction visualized and no evidence of invasive disease.';
+                } else {
+                    result.management = 'Treatment recommended (excision preferred)';
+                    result.details = 'Age ≥25 with CIN2: treatment is recommended. Excisional procedure (LEEP/cone) is preferred — allows histological assessment of margins. Ablation acceptable if entire SCJ visualized, no invasive disease suspected, and patient understands limitations.';
+                }
+                result.riskCategory = 'high';
+            }
+            if (isPregnant) {
+                result.management = 'Defer treatment until postpartum';
+                result.details = 'CIN2 in pregnancy: treatment contraindicated. Colposcopy surveillance during pregnancy acceptable. Defer definitive treatment until ≥4 weeks postpartum.';
+                result.specialConsiderations.push('CIN2 in pregnancy: defer treatment to postpartum; no ECC');
+            }
+            break;
+
+        case 'cin3':
+            // CIN3: treatment always recommended
+            if (margins === 'positive') {
+                result.management = 'Re-excision recommended (positive margins)';
+                result.details = 'CIN3 with positive margins: re-excision (LEEP/cone) is recommended. If re-excision not feasible (e.g., no residual cervix), hysterectomy may be considered after childbearing is complete. Annual HPV testing for 3 years after treatment, then q3y for ≥25 years.';
+            } else {
+                result.management = 'Excisional treatment (LEEP/cone) recommended';
+                result.details = 'CIN3: excisional treatment is the standard of care. LEEP or cone biopsy preferred for histological assessment of margins. Ablation NOT recommended for CIN3. Post-treatment: HPV-based testing in 6 months, then annual x3, then q3y for ≥25 years.';
+            }
+            result.riskCategory = 'very-high';
+            if (isPregnant) {
+                result.management = 'Colposcopy surveillance during pregnancy; defer treatment to postpartum';
+                result.details = 'CIN3 in pregnancy: treatment contraindicated. Colposcopy surveillance each trimester acceptable. Defer treatment until ≥4 weeks postpartum unless invasion suspected.';
+                result.specialConsiderations.push('CIN3 in pregnancy: defer treatment, colposcopic surveillance each trimester');
+            }
+            if (age < 25) {
+                result.specialConsiderations.push('Age <25 with CIN3: treatment still recommended (CIN3 does not have high regression rate like CIN2)');
+            }
+            break;
+
+        case 'ais':
+            result.management = 'Diagnostic excisional procedure (cold knife cone preferred)';
+            result.details = 'AIS: diagnostic excisional procedure is mandatory. Cold knife cone preferred for optimal margin assessment and pathological interpretation. If margins negative and future fertility desired → surveillance. If childbearing complete → hysterectomy recommended after excision confirms diagnosis. Annual HPV + cytology co-testing for ≥25 years.';
+            result.riskCategory = 'very-high';
+            if (isPregnant) {
+                result.specialConsiderations.push('AIS in pregnancy: colposcopy for diagnosis; defer excision to postpartum if no invasion suspected');
+            }
+            break;
+
+        case 'cancer':
+            result.management = 'Stage-appropriate oncologic management';
+            result.details = 'Invasive cervical cancer diagnosed. Refer to gynecologic oncology for staging, workup, and definitive management. No further ASCCP guideline recommendations apply — management per NCCN or equivalent oncology guidelines.';
+            result.riskCategory = 'very-high';
+            break;
+
+        case 'inadequate':
+            result.management = 'Diagnostic excision OR repeat colposcopy';
+            result.details = 'Inadequate/unsatisfactory colposcopy: the transformation zone was not fully visualized. Options: (1) diagnostic excisional procedure, or (2) repeat colposcopy in 6–12 months with additional techniques to visualize the SCJ. Consider patient age, risk factors, and cytology results in decision.';
+            result.riskCategory = 'high';
+            break;
+
+        default:
+            result.management = 'Select colposcopy biopsy result';
+            result.riskCategory = 'intermediate';
+    }
+
+    // Add HPV status context
+    if (hpvPositive && !result.details.includes('HPV')) {
+        result.details += ` Current HPV ${hpv16_18 ? '16/18 positive' : 'positive'} — this modifies surveillance recommendations.`;
+    }
+
+    return result;
 }
 
 function handleHpvNotDone(age, cytology, isPregnant, isImmuno, hasSymptoms) {
@@ -569,18 +744,28 @@ function displayResults(results) {
 function displayClinicalSummary(data) {
     const grid = document.getElementById('clinicalSummary');
     grid.innerHTML = '';
+    const sitLabels = { 'screening': 'Routine Screening', 'surveillance': 'Surveillance',
+        'post-colposcopy': 'Post-Colposcopy', 'post-treatment': 'Post-Treatment' };
     const items = [
         ['Age', data.age + ' years'],
-        ['Screening', fmt(data.screeningType)],
-        ['Cytology', data.cytology],
-        ['HPV', formatHPVResult(data.hpvResult)],
+        ['Clinical Situation', sitLabels[data.clinicalSituation] || fmt(data.clinicalSituation) || 'Screening'],
     ];
-    if (data.priorHpvNegative && data.priorHpvNegative !== 'none')
-        items.push(['Prior HPV(-)', fmt(data.priorHpvNegative)]);
-    if (data.recentColposcopy && data.recentColposcopy !== 'none')
-        items.push(['Recent Colposcopy', fmt(data.recentColposcopy)]);
-    if (data.biopsyHistory && data.biopsyHistory !== 'none')
-        items.push(['Prior Biopsy', fmt(data.biopsyHistory)]);
+    if (data.clinicalSituation === 'post-colposcopy') {
+        if (data.colpoBiopsy) items.push(['Biopsy Result', fmt(data.colpoBiopsy)]);
+        if (data.precedingCytology) items.push(['Preceding Cytology', fmt(data.precedingCytology)]);
+        if (data.excisionMargins && data.excisionMargins !== 'not-applicable')
+            items.push(['Margins', data.excisionMargins === 'negative' ? 'Negative' : 'Positive']);
+    }
+    items.push(['Cytology', data.cytology || 'N/A']);
+    items.push(['HPV', formatHPVResult(data.hpvResult)]);
+    if (data.clinicalSituation !== 'post-colposcopy') {
+        if (data.priorHpvNegative && data.priorHpvNegative !== 'none')
+            items.push(['Prior HPV(-)', fmt(data.priorHpvNegative)]);
+        if (data.recentColposcopy && data.recentColposcopy !== 'none')
+            items.push(['Recent Colposcopy', fmt(data.recentColposcopy)]);
+        if (data.biopsyHistory && data.biopsyHistory !== 'none')
+            items.push(['Prior Biopsy', fmt(data.biopsyHistory)]);
+    }
     if (data.treatmentHistory && data.treatmentHistory !== 'none')
         items.push(['Prior Treatment', fmt(data.treatmentHistory)]);
     if (data.specialPopulation && data.specialPopulation.length > 0)

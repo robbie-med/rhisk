@@ -71,13 +71,13 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="screeningType">Screening Type <span class="required">*</span></label>
-                                <select id="screeningType" name="screeningType" required>
-                                    <option value="">Select screening type</option>
-                                    <option value="routine">Routine Screening</option>
+                                <label for="clinicalSituation">Clinical Situation <span class="required">*</span></label>
+                                <select id="clinicalSituation" name="clinicalSituation" required>
+                                    <option value="">Select clinical situation</option>
+                                    <option value="screening">Routine Screening</option>
                                     <option value="surveillance">Surveillance (prior abnormal)</option>
-                                    <option value="post-treatment">Post-Treatment Follow-up</option>
-                                    <option value="symptomatic">Symptomatic Evaluation</option>
+                                    <option value="post-colposcopy">Post-Colposcopy Management</option>
+                                    <option value="post-treatment">Post-Treatment Surveillance</option>
                                 </select>
                                 <span class="error-message"></span>
                             </div>
@@ -123,9 +123,48 @@
                         </div>
                     </div>
 
-                    <!-- Step 2: Screening History -->
+                    <!-- Step 2: History / Post-Colposcopy -->
                     <div class="form-step" data-step="2">
-                        <h2>Screening & Colposcopy History</h2>
+                        <h2 id="step2Heading">Screening & Colposcopy History</h2>
+
+                        <!-- Post-Colposcopy Fields (shown when clinical situation = post-colposcopy) -->
+                        <div id="postColposcopyFields" style="display:none;">
+                            <div class="form-group">
+                                <label for="colpoBiopsy">Colposcopy Biopsy Result <span class="required">*</span></label>
+                                <select id="colpoBiopsy" name="colpoBiopsy">
+                                    <option value="">Select biopsy result</option>
+                                    <option value="negative">Negative / No CIN</option>
+                                    <option value="cin1">CIN1</option>
+                                    <option value="cin2">CIN2</option>
+                                    <option value="cin3">CIN3</option>
+                                    <option value="ais">AIS</option>
+                                    <option value="cancer">Invasive cancer</option>
+                                    <option value="inadequate">Inadequate / unsatisfactory colposcopy</option>
+                                </select>
+                                <span class="error-message"></span>
+                            </div>
+
+                            <div class="form-group" id="precedingCytologyGroup" style="display:none;">
+                                <label for="precedingCytology">Preceding Cytology Result</label>
+                                <select id="precedingCytology" name="precedingCytology">
+                                    <option value="">Select preceding cytology</option>
+                                    <option value="less-than-ASC-H"><ASC-H (NILM, ASC-US, LSIL)</option>
+                                    <option value="ASC-H-or-higher">ASC-H or higher</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="excisionMarginsGroup" style="display:none;">
+                                <label for="excisionMargins">Excision Margins (if excisional procedure done)</label>
+                                <select id="excisionMargins" name="excisionMargins">
+                                    <option value="not-applicable">No excision performed</option>
+                                    <option value="negative">Negative margins</option>
+                                    <option value="positive">Positive margins</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Standard History Fields -->
+                        <div id="standardHistoryFields">
                         
                         <div class="form-group">
                             <label for="priorHpvNegative">Most Recent Negative HPV Test</label>
@@ -204,6 +243,7 @@
                             <label for="treatmentDate">Date of Most Recent Treatment</label>
                             <input type="date" id="treatmentDate" name="treatmentDate">
                         </div>
+                        </div><!-- end standardHistoryFields -->
                     </div>
 
                     <!-- Step 3: Risk Factors -->
