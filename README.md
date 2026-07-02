@@ -19,7 +19,7 @@ A simple, mobile-first web application for cervical cancer screening risk assess
 This is a simple static website - just download the files and open `index.html` in any browser!
 
 ### Option 1: Direct Use
-1. Download the files: `index.html`, `styles.css`, and `favicon.png`
+1. Download the files: `index.html`, `styles.css`, and `favicon.svg`
 2. Open `index.html` in your web browser
 3. Start using the risk assessment tool
 
@@ -86,7 +86,7 @@ The app can be easily customized by editing:
 rhisk/
 ├── index.html     # Main application file
 ├── styles.css     # All styling and responsive design
-├── favicon.png    # App icon
+├── favicon.svg    # App icon
 └── README.md      # This documentation
 ```
 
