@@ -358,6 +358,40 @@ function performRiskCalculation() {
         };
     }
 
+    // Age <25: special management for low-grade (ASCCP 2019)
+    // LSIL → repeat cytology 1yr preferred; ASC-US/HPV+ → colposcopy but cytology acceptable
+    if (age < 25 && cytology === 'LSIL') {
+        return {
+            immediateRisk: immediate, fiveYearRisk: fiveYear,
+            riskCategory: 'intermediate',
+            management: 'Repeat cytology in 1 year (preferred for age <25)',
+            details: `Age <25 with LSIL: repeat cytology in 1 year is preferred. ` +
+                `If normal on repeat → routine screening. If ASC-US or LSIL persists at 1 year → colposcopy. ` +
+                `If HSIL or ASC-H at any time → colposcopy. ` +
+                `(Immediate CIN3+ risk ${immediate}% — in patients ≥25 this would warrant ${immediate >= RISK.COLPOSCOPY ? 'colposcopy' : 'surveillance'}.)`,
+            specialConsiderations: [
+                'Age <25: CIN2 has high spontaneous regression rate; observation preferred',
+                'Avoid expedited treatment in this age group'
+            ],
+            formData
+        };
+    }
+    if (age < 25 && cytology === 'ASC-US' && immediate !== null && immediate >= RISK.COLPOSCOPY) {
+        return {
+            immediateRisk: immediate, fiveYearRisk: fiveYear,
+            riskCategory: 'high',
+            management: 'Colposcopy recommended (repeat cytology in 1 year acceptable)',
+            details: `Age <25 with ASC-US and HPV positive (immediate CIN3+ risk ${immediate}%). ` +
+                `Colposcopy is recommended. However, per ASCCP 2019, repeat cytology in 1 year is an acceptable alternative. ` +
+                `If repeat cytology shows ASC-US or worse → colposcopy.`,
+            specialConsiderations: [
+                'Age <25: repeat cytology in 1 year is an acceptable alternative to colposcopy for ASC-US/HPV(+)',
+                'Avoid expedited treatment in this age group'
+            ],
+            formData
+        };
+    }
+
     // Post-treatment surveillance
     if (hasBeenTreated && formData.screeningType === 'post-treatment') {
         const treatmentDate = formData.treatmentDate ? new Date(formData.treatmentDate) : null;
