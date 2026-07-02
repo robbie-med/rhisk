@@ -268,22 +268,19 @@ function calculateRisk() {
     if (!validateStep(currentStep)) return;
     saveStepData();
 
-    document.getElementById('loadingResults').style.display = 'block';
-    document.getElementById('resultsContent').style.display = 'none';
-
     document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
     currentStep = totalSteps;
     document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
     updateProgressBar();
     updateNavigation();
 
-    // Short delay for UX, not simulated calculation
-    setTimeout(() => {
-        const results = performRiskCalculation();
-        displayResults(results);
-        document.getElementById('loadingResults').style.display = 'none';
-        document.getElementById('resultsContent').style.display = 'block';
-    }, 400);
+    // Instant calculation — no delay
+    const results = performRiskCalculation();
+    displayResults(results);
+    document.getElementById('resultsContent').style.display = 'block';
+
+    // Animate gauge after display
+    setTimeout(() => animateGauge(results), 50);
 }
 
 function performRiskCalculation() {
@@ -701,15 +698,13 @@ function displayResults(results) {
     const card = document.getElementById('riskCard');
     card.className = 'risk-card ' + results.riskCategory;
 
-    // Risk bar
-    const fill = document.getElementById('riskFill');
+    // Update gauge value in center
+    const gv = document.getElementById('gaugeValue');
     if (results.immediateRisk !== null) {
-        const w = Math.min(Math.max(results.immediateRisk * 1.5, 2), 100);
-        fill.style.width = w + '%';
+        gv.textContent = results.immediateRisk.toFixed(1) + '%';
     } else {
-        fill.style.width = '0%';
+        gv.textContent = '—';
     }
-    fill.className = 'risk-fill ' + results.riskCategory;
 
     // 5-year risk
     const fiveYr = document.getElementById('fiveYearRiskSection');
@@ -740,6 +735,43 @@ function displayResults(results) {
     // Documentation for clipboard
     generateDocumentation(results);
 }
+
+// SVG Gauge animation — maps risk % to arc endpoint
+function animateGauge(results) {
+    const gaugeFill = document.getElementById('gaugeFill');
+    if (!results.immediateRisk) {
+        gaugeFill.setAttribute('d', 'M 30 105 A 70 70 0 0 1 30 105');
+        return;
+    }
+    // Map 0-100% risk to 180° arc (left to right on semicircle)
+    // 0% = left (30,105), 100% = right (170,105), midpoint at top (100,35)
+    const pct = Math.min(Math.max(results.immediateRisk / 100, 0), 1);
+    const angle = Math.PI * pct; // 0 to PI radians
+    const cx = 100, cy = 105, r = 70;
+    const ex = cx + r * Math.cos(Math.PI - angle);
+    const ey = cy - r * Math.sin(Math.PI - angle);
+    const sweep = pct > 0.5 ? '1' : '0';
+    const largeArc = pct > 0.5 ? '1' : '0';
+    gaugeFill.setAttribute('d',
+        `M 30 105 A 70 70 0 ${largeArc} ${sweep} ${ex.toFixed(1)} ${ey.toFixed(1)}`);
+}
+
+// validateStep: also check colpoBiopsy for post-colposcopy
+const _origValidateStep = validateStep;
+validateStep = function(step) {
+    let ok = _origValidateStep(step);
+    if (step === 2) {
+        const sit = document.getElementById('clinicalSituation').value;
+        if (sit === 'post-colposcopy') {
+            const biopsy = document.getElementById('colpoBiopsy');
+            if (!biopsy.value) {
+                showError(biopsy, 'Biopsy result required');
+                ok = false;
+            }
+        }
+    }
+    return ok;
+};
 
 function displayClinicalSummary(data) {
     const grid = document.getElementById('clinicalSummary');
