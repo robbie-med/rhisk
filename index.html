@@ -139,13 +139,8 @@ function init() {
 
 function render() {
   const s = App.getState();
-  if (!s.page) { document.getElementById('content').innerHTML = '<div class="card"><p>Loading...</p></div>'; return; }
-
-  console.log('RENDER state:', s.currentState, 'algo:', s.currentAlgoFile, 'items:', s.page?.content?.length);
-  if (s.page?.content) {
-    s.page.content.forEach((item, i) => {
-      console.log('  ['+i+']', item.type, item.id, item.title, 'value:', item.value, 'choices:', item.choices?.length);
-    });
+  if (!s.page) { document.getElementById('content').innerHTML = '<div class="card"><p>Loading...</p></div>'; return; }  if (s.page?.content) {
+    s.page.content.forEach((item, i) => {    });
   }
 
   renderSteps();

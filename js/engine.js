@@ -227,8 +227,7 @@ const Engine = (function() {
 
     // Registered function calls: funcName(arg1, arg2, ...)
     const funcMatch = expr.match(/^(\w+)\((.+)\)$/);
-    if (funcMatch) console.log('FUNC_CALL:', funcMatch[1], 'args:', funcMatch[2], 'registered:', !!funcRegistry[funcMatch[1]]);
-    if (funcMatch && funcRegistry[funcMatch[1]]) {
+    if (funcMatch)    if (funcMatch && funcRegistry[funcMatch[1]]) {
       const funcName = funcMatch[1];
       const argsStr = funcMatch[2];
       // Split args by comma (handle nested calls by tracking parens depth)
@@ -243,9 +242,7 @@ const Engine = (function() {
         }
       }
       args.push(argsStr.substring(last).trim());
-      const result = callFunction(funcName, args.map(a => evalAtomic(a)));
-      console.log('FUNC_RESULT:', funcName, '=>', result);
-      return result;
+      const result = callFunction(funcName, args.map(a => evalAtomic(a)));      return result;
     }
 
     // Variable lookup
@@ -319,9 +316,6 @@ const Engine = (function() {
     console.log('BODY_EVAL:', JSON.stringify(fn.body), 'vars.r:', JSON.stringify(vars['r']));
     console.log('RAW_COMPARE:', vars['r'] === 'HPV 16+', 'len:', vars['r']?.length, 'charCodes:', [...(vars['r']||'')].map(c=>c.charCodeAt(0)));
     const result = evaluateExpr(fn.body);
-    console.log('BODY_RESULT:', result);
-    console.log('CALL_FN_RESULT:', name, '=>', result);
-
     // Restore
     for (let i = 0; i < fn.params.length; i++) {
       if (saved[fn.params[i]] !== undefined) {
