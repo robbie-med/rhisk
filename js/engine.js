@@ -135,7 +135,7 @@ const Engine = (function() {
         switch (op) {
           case '===': return left === right;
           case '!==': return left !== right;
-          case '==': return left == right;
+          case '==': console.log('CMP ==:', JSON.stringify(left), '==', JSON.stringify(right), '=', left == right); return left == right;
           case '!=': return left != right;
           case '>=': return Number(left) >= Number(right);
           case '<=': return Number(left) <= Number(right);
