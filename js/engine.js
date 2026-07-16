@@ -18,7 +18,16 @@ const Engine = (function() {
     return v.startsWith('HPV+') || v.includes('16') || v.includes('18') || v === 'Positive';
   }
 
-  // Split an expression on a top-level operator (not inside parens)
+  // Helper: skip over a quoted string, returning position after closing quote
+  function skipString(expr, i, quote) {
+    for (let j = i + 1; j < expr.length; j++) {
+      if (expr[j] === '\\') { j++; continue; } // skip escaped chars
+      if (expr[j] === quote) return j;
+    }
+    return expr.length;
+  }
+
+  // Split an expression on a top-level operator (not inside parens or strings)
   function splitOp(expr, op) {
     const parts = [];
     let depth = 0;
@@ -28,6 +37,9 @@ const Engine = (function() {
       const c = expr[i];
       if (c === '(') depth++;
       else if (c === ')') depth--;
+      else if ((c === "'" || c === '"') && depth === 0) {
+        i = skipString(expr, i, c);
+      }
       else if (depth === 0 && expr.substring(i, i + oplen) === op) {
         parts.push(expr.substring(last, i).trim());
         last = i + oplen;
@@ -38,7 +50,7 @@ const Engine = (function() {
     return parts.filter(p => p.length > 0);
   }
 
-  // Find top-level operator position
+  // Find top-level operator position (not inside parens or strings)
   function findOp(expr, op, from) {
     from = from || 0;
     let depth = 0;
@@ -46,6 +58,9 @@ const Engine = (function() {
       const c = expr[i];
       if (c === '(') depth++;
       else if (c === ')') depth--;
+      else if ((c === "'" || c === '"') && depth === 0) {
+        i = skipString(expr, i, c);
+      }
       else if (depth === 0 && expr.substring(i, i + op.length) === op) return i;
     }
     return -1;
