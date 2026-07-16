@@ -289,6 +289,7 @@ const Engine = (function() {
 
   // Call a registered function
   function callFunction(name, args) {
+    console.log('CALL_FN:', name, 'args:', JSON.stringify(args), 'params:', JSON.stringify(funcRegistry[name]?.params), 'body:', JSON.stringify(funcRegistry[name]?.body));
     const fn = funcRegistry[name];
     if (!fn) return undefined;
 
@@ -300,6 +301,7 @@ const Engine = (function() {
     }
 
     const result = evaluateExpr(fn.body);
+    console.log('CALL_FN_RESULT:', name, '=>', result);
 
     // Restore
     for (let i = 0; i < fn.params.length; i++) {
