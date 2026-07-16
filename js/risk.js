@@ -74,7 +74,7 @@ const RiskCalculator = (function() {
     },
     'HPV+ (other)': {
       'Normal':  { text: 'Colposcopy', style: 'colposcopy', ref: 'Extended' },
-      'ASC-US':  { text: '1 year follow up', style: 'surveillance', ref: 'Extended' },
+      'ASC-US':  { text: 'Colposcopy', style: 'colposcopy', ref: 'Extended' },
       'LSIL':    { text: 'Colposcopy', style: 'colposcopy', ref: 'Extended' },
       'ASC-H':   { text: 'Colposcopy', style: 'colposcopy', ref: 'Extended' },
       'HSIL':    { text: 'Colposcopy', style: 'colposcopy', ref: 'Extended' },
