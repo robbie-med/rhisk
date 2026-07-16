@@ -298,9 +298,12 @@ const Engine = (function() {
     for (let i = 0; i < fn.params.length; i++) {
       saved[fn.params[i]] = vars[fn.params[i]];
       vars[fn.params[i]] = args[i] !== undefined ? args[i] : null;
+      console.log('SET_PARAM:', fn.params[i], '=', JSON.stringify(vars[fn.params[i]]));
     }
 
+    console.log('BODY_EVAL:', JSON.stringify(fn.body), 'vars.r:', JSON.stringify(vars['r']));
     const result = evaluateExpr(fn.body);
+    console.log('BODY_RESULT:', result);
     console.log('CALL_FN_RESULT:', name, '=>', result);
 
     // Restore
