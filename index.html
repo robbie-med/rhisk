@@ -139,12 +139,11 @@ function init() {
 
 function render() {
   const s = App.getState();
-  if (!s.page) { document.getElementById('content').innerHTML = '<div class="card"><p>Loading...</p></div>'; return; }  if (s.page?.content) {
-    s.page.content.forEach((item, i) => {    });
-  }
+  if (!s.page) { document.getElementById('content').innerHTML = '<div class="card"><p>Loading...</p></div>'; return; }
 
   renderSteps();
   renderContent();
+  renderNav();
   updatePatientInfoFields();
 }
 
