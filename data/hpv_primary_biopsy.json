@@ -1,0 +1,161 @@
+{
+  "variables": {
+    "short": "Biopsy",
+    "colpoResult": "",
+    "cytoResult": "",
+    "pregnancy": "",
+    "medCount": 0
+  },
+  "derived": [
+    {
+      "colpo_raw": "colpoResult == 'No CIN' ? 'NO CIN' : colpoResult == 'Histologic LSIL (CIN 1)' ? 'CIN 1' : colpoResult == 'Histologic HSIL (CIN 2)' ? 'CIN 2' : colpoResult == 'Histologic HSIL (CIN 3)' ? 'CIN 3' : colpoResult == 'Histologic HSIL (Unspecified)' ? 'Unspecified' : colpoResult == 'AIS' ? 'AIS' : ''",
+      "colpo": "colpo_raw == 'CIN 2' && (patient_age == 'Under 25' || pregnancy == 'Yes') ? 'CIN 2 (Observation)' : colpo_raw"
+    }
+  ],
+  "sections": [
+    {
+      "valid": "true",
+      "title": "ASCCP HPV Primary: Biopsy Medications",
+      "state": "medication",
+      "content": [
+        {
+          "visible": true,
+          "type": "overlay",
+          "text": ""
+        },
+        {
+          "visible": "true",
+          "text": "Medication History",
+          "type": "switch",
+          "id": "medication_history",
+          "choices": [
+            {
+              "text": "Currently or has previously taken medication to treat ASCCP HPV Primary: Biopsy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "valid": true,
+      "title": "ASCCP HPV Primary: Biopsy",
+      "state": "intro",
+      "content": [
+        {
+          "id": "colpoResult",
+          "visible": "true",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "No CIN",
+              "img": "",
+              "alts": "",
+              "value": "No CIN"
+            },
+            {
+              "text": "Histologic LSIL (CIN 1)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic LSIL (CIN 1)"
+            },
+            {
+              "text": "Histologic HSIL (CIN 2)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic HSIL (CIN 2)"
+            },
+            {
+              "text": "Histologic HSIL (CIN 3)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic HSIL (CIN 3)"
+            },
+            {
+              "text": "Histologic HSIL (Unspecified)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic HSIL (Unspecified)"
+            },
+            {
+              "text": "AIS",
+              "img": "",
+              "alts": "",
+              "value": "AIS"
+            }
+          ],
+          "title": "Colposcopy",
+          "text": "",
+          "style": "colposcopy"
+        },
+        {
+          "id": "cytoResult",
+          "visible": "colpoResult == 'No CIN' || colpoResult == 'Histologic LSIL (CIN 1)'",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            }
+          ],
+          "title": "Cytology preceding colposcopy",
+          "text": "What is the Cytology Result that lead to Colposcopy?",
+          "style": "prior_cyto"
+        },
+        {
+          "id": "pregnancy",
+          "visible": "colpoResult == 'Histologic HSIL (CIN 2)' && patient_age != 'Under 25'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Yes",
+              "img": "",
+              "alts": "",
+              "value": "Yes"
+            },
+            {
+              "text": "No",
+              "img": "",
+              "alts": "",
+              "value": "No"
+            }
+          ],
+          "title": "Future pregnancy",
+          "text": "Are there concerns about future pregnancy?",
+          "style": "colposcopy"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "title": "Routine screening",
+    "name": "ASCCP HPV Primary: Screening",
+    "active": true,
+    "age": [
+      "25 to 29",
+      "30+"
+    ],
+    "filename": "hpv_primary_screening"
+  },
+  {
+    "title": "Routine screening",
+    "name": "ASCCP: Under 25 Screening",
+    "active": true,
+    "age": [
+      "Under 25"
+    ],
+    "filename": "screening_25"
+  },
+  {
+    "title": "Evaluation of a colposcopic biopsy",
+    "name": "ASCCP HPV Primary: Biopsy",
+    "active": true,
+    "age": [
+      "Under 25",
+      "25 to 29",
+      "30+"
+    ],
+    "filename": "hpv_primary_biopsy"
+  },
+  {
+    "title": "Management of results during post colposcopy surveillance (within past 7 years)",
+    "name": "ASCCP HPV Primary: Post Colpo",
+    "active": true,
+    "age": [
+      "Under 25",
+      "25 to 29",
+      "30+"
+    ],
+    "filename": "hpv_primary_postcolpo"
+  },
+  {
+    "title": "Follow-up after treatment",
+    "name": "ASCCP HPV Primary: Post Treatment",
+    "active": true,
+    "age": [
+      "Under 25",
+      "25 to 29",
+      "30+"
+    ],
+    "filename": "hpv_primary_postcolpo"
+  }
+]

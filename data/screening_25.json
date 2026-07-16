@@ -1,0 +1,235 @@
+{
+  "variables": {
+    "short": "Screening",
+    "first": "",
+    "sixteen": "",
+    "eighteen": "",
+    "cytology1": "",
+    "cytology2": "",
+    "end_result": "",
+    "cytology": "",
+    "history": "",
+    "hpv_history": "",
+    "low_grade_history": "",
+    "high_grade_history": "",
+    "negative_no_history": "",
+    "high_grade": "",
+    "agc": "",
+    "agc_past": "",
+    "positive_results": "",
+    "hpvnon": "",
+    "positive_history": "",
+    "cytology_history": "",
+    "colpo_not_done": "",
+    "dual_stain": "",
+    "pos_both": "",
+    "current_hpv": "",
+    "current_cytology": "",
+    "prior_hpv": "None",
+    "prior_cytology": "",
+    "prior_v": false,
+    "prior_agc": false,
+    "prior_hsil": false,
+    "prior_asc_h": false,
+    "prior_lsil": false,
+    "prior_asc_us": false,
+    "prior_normal": false,
+    "prior_cytology_count": 0,
+    "prior_hpv_count": 0,
+    "medCount": 0
+  },
+  "derived": [
+    {
+      "current_hpv": "cytology == 'ASC-US' ? first : 'None'",
+      "current_cytology": "cytology",
+      "prior_cytology": "(cytology == 'Normal' || cytology == 'ASC-US' || cytology == 'LSIL') ? prior_agc ? 'AGC' : prior_hsil ? 'HSIL' : prior_asc_h ? 'ASC-H' : prior_lsil ? 'LSIL' : prior_asc_us ? 'ASC-US' : prior_normal ? 'Normal' : 'None' : 'None'",
+      "prior_cytology_count": "(prior_agc ? 1 : 0) + (prior_hsil ? 1 : 0) + (prior_asc_h ? 1 : 0) + (prior_lsil ? 1: 0) + (prior_asc_us ? 1 : 0) + (prior_normal ? 1 : 0)"
+    }
+  ],
+  "sections": [
+    {
+      "valid": "true",
+      "title": "ASCCP: Under 25 Screening Medications",
+      "state": "medication",
+      "content": [
+        {
+          "visible": true,
+          "type": "overlay",
+          "text": ""
+        },
+        {
+          "visible": "true",
+          "text": "Medication History",
+          "type": "switch",
+          "id": "medication_history",
+          "choices": [
+            {
+              "text": "Currently or has previously taken medication to treat ASCCP: Under 25 Screening"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "valid": true,
+      "title": "ASCCP: Under 25 Screening",
+      "state": "intro",
+      "content": [
+        {
+          "id": "cytology",
+          "visible": "true",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Current Cytology",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "first",
+          "visible": "cytology == 'ASC-US'",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            },
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            },
+            {
+              "text": "HPV+",
+              "img": "Positive",
+              "alts": "",
+              "value": "HPV+"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "prior",
+          "visible": "cytology == 'Normal' || cytology == 'ASC-US' || cytology == 'LSIL'",
+          "type": "checkboxes",
+          "choices": [
+            {
+              "text": "Normal",
+              "value": "normal"
+            },
+            {
+              "text": "ASC-US",
+              "value": "asc_us"
+            },
+            {
+              "text": "LSIL",
+              "value": "lsil"
+            },
+            {
+              "text": "ASC-H",
+              "value": "asc_h"
+            },
+            {
+              "text": "AGC",
+              "value": "agc"
+            },
+            {
+              "text": "HSIL",
+              "value": "hsil"
+            }
+          ],
+          "title": "Prior History",
+          "text": "Does the patient have abnormal results on the most recent prior screening? Leave blank if history is unknown.",
+          "style": "prior"
+        },
+        {
+          "id": "",
+          "visible": "prior_v && prior_cytology_count > 1",
+          "type": "error",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "More than one prior cytology result selected.",
+          "style": ""
+        },
+        {
+          "id": "colpo_not_done",
+          "visible": "prior_v && (prior_asc_h || prior_agc || prior_hsil)",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Yes",
+              "img": "",
+              "alts": "",
+              "value": "Yes"
+            },
+            {
+              "text": "No",
+              "img": "",
+              "alts": "",
+              "value": "No"
+            }
+          ],
+          "title": "Colposcopy",
+          "text": "A Colposcopy was previously recommended for this result. Does the patient have a colposcopy result?",
+          "style": "colposcopy"
+        },
+        {
+          "id": "end_result",
+          "visible": "colpo_not_done_v && colpo_not_done == 'Yes'",
+          "type": "stop",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Please use another Clinical Situation: either Evaulation of colposcopic biopsy or Management of results during post colposcopy surveillance. ",
+          "style": ""
+        }
+      ]
+    }
+  ]
+}

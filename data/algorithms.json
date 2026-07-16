@@ -1,0 +1,67 @@
+[
+  {
+    "title": "ASCCP HPV Primary: Screening",
+    "diagnosis": "ASCCP HPV Primary: Screening",
+    "population": "Adult",
+    "age": "25 to 29,30+",
+    "gender": "",
+    "pregnancy": "",
+    "algorithm": "hpv_primary_screening",
+    "pdf": "hpv_primary_screening",
+    "ref_pdf": "",
+    "keywords": [],
+    "tool": ""
+  },
+  {
+    "title": "ASCCP: Under 25 Screening",
+    "diagnosis": "ASCCP: Under 25 Screening",
+    "population": "Adult",
+    "age": "Under 25",
+    "gender": "",
+    "pregnancy": "",
+    "algorithm": "screening_25",
+    "pdf": "screening_25",
+    "ref_pdf": "",
+    "keywords": [],
+    "tool": ""
+  },
+  {
+    "title": "ASCCP HPV Primary: Post Colpo",
+    "diagnosis": "ASCCP HPV Primary: Post Colpo",
+    "population": "Adult",
+    "age": "Under 25,25 to 29,30+",
+    "gender": "",
+    "pregnancy": "",
+    "algorithm": "hpv_primary_postcolpo",
+    "pdf": "hpv_primary_postcolpo",
+    "ref_pdf": "",
+    "keywords": [],
+    "tool": ""
+  },
+  {
+    "title": "ASCCP HPV Primary: Biopsy",
+    "diagnosis": "ASCCP HPV Primary: Biopsy",
+    "population": "Adult",
+    "age": "Under 25,25 to 29,30+",
+    "gender": "",
+    "pregnancy": "",
+    "algorithm": "hpv_primary_biopsy",
+    "pdf": "hpv_primary_biopsy",
+    "ref_pdf": "",
+    "keywords": [],
+    "tool": ""
+  },
+  {
+    "title": "ASCCP HPV Primary: Post Treatment",
+    "diagnosis": "ASCCP HPV Primary: Post Treatment",
+    "population": "Adult",
+    "age": "Under 25,25 to 29,30+",
+    "gender": "",
+    "pregnancy": "",
+    "algorithm": "hpv_primary_postcolpo",
+    "pdf": "hpv_primary_postcolpo",
+    "ref_pdf": "",
+    "keywords": [],
+    "tool": ""
+  }
+]

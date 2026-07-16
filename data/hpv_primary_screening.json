@@ -1,0 +1,587 @@
+{
+  "variables": {
+    "short": "Screening",
+    "hpv": "",
+    "hpv_ques": "",
+    "sixteen": "",
+    "eighteen": "",
+    "cytology1": "",
+    "cytology2": "",
+    "cytology_history": "",
+    "cytology_history1": "",
+    "cytology_history2": "",
+    "colpo_not_done1": "",
+    "colpo_not_done2": "",
+    "colpo_not_done3": "",
+    "cytology": "",
+    "history": "",
+    "hpv_history": "",
+    "low_grade_history": "",
+    "high_grade_history": "",
+    "negative_no_history": "",
+    "high_grade": "",
+    "agc": "",
+    "agc_past": "",
+    "positive_results": "",
+    "hpvnon": "",
+    "positive_history": "",
+    "colpo_not_done": "",
+    "prior": "",
+    "current_cytology_or_ds": "",
+    "current_cytology": "",
+    "current_ds": "",
+    "current_agc": false,
+    "current_hsil": false,
+    "current_asc_h": false,
+    "current_lsil": false,
+    "current_asc_us": false,
+    "current_normal": false,
+    "current_dual_stain_negative": false,
+    "current_dual_stain_positive": false,
+    "prior_hpv": "",
+    "prior_cytology": "",
+    "prior_ds": "",
+    "prior_hpv_positive": false,
+    "prior_hpv_negative": false,
+    "prior_agc": false,
+    "prior_hsil": false,
+    "prior_asc_h": false,
+    "prior_lsil": false,
+    "prior_asc_us": false,
+    "prior_normal": false,
+    "prior_dual_stain_negative": false,
+    "prior_dual_stain_positive": false,
+    "current_hpv": "",
+    "current_cytology_count": 0,
+    "current_ds_count": 0,
+    "prior_cytology_count": 0,
+    "prior_hpv_count": 0,
+    "medCount": 0
+  },
+  "derived": [
+    {
+      "function1": "is_hpv_genotyped = (r) => r == 'HPV 16+' || r == 'HPV 18+'",
+      "function2": "is_hpv_positive = (r) => is_hpv_genotyped(r) || r.startsWith('HPV+')",
+      "function3": "eval_cytology_ds = (cyt, ds) => (cyt == 'None' && ds == 'None') ? 'None' : ['ASC-H or HSIL', 'ASC-H', 'HSIL', 'AGC'].indexOf(cyt) >= 0 ? cyt : (ds == 'Dual Stain Positive' || ['ASC-US', 'LSIL'].indexOf(cyt) >= 0) ? 'Low Grade Cytology and/or Dual Stain +' : (ds == 'Dual Stain Negative' || cyt == 'Normal') ? 'Normal Cytology or Dual Stain -' : cyt",
+      "function4": "eval_hpv_cytology_ds = (hp, cyt, ds) => (cyt == 'None' && ds == 'None') ? 'None' : ['ASC-H or HSIL', 'ASC-H', 'HSIL', 'AGC'].indexOf(cyt) >= 0 ? cyt : (ds == 'Dual Stain Positive' || ['ASC-US', 'LSIL'].indexOf(cyt) >= 0) ? 'Low Grade Cytology and/or Dual Stain +' : (ds == 'Dual Stain Negative' || cyt == 'Normal') ? 'Normal Cytology or Dual Stain -' : cyt"
+    },
+    {
+      "current_hpv": "hpv",
+      "current_cytology": "!is_hpv_positive(hpv) ? '' : current_agc ? 'AGC' : current_hsil ? 'HSIL' : current_asc_h ? 'ASC-H' : current_lsil ? 'LSIL' : current_asc_us ? 'ASC-US' : current_normal ? 'Normal' : 'None'",
+      "_cytology": "(hpv == 'None' && cytology1.length) ? cytology1 : (hpv == 'HPV-' && cytology2.length) ? cytology2 : (is_hpv_positive(hpv) && current_cytology.length) ? current_cytology : ''",
+      "current_ds": "!is_hpv_positive(hpv) ? '' : current_dual_stain_positive ? 'Dual Stain Positive' : current_dual_stain_negative ? 'Dual Stain Negative' : 'None'",
+      "current_cytology_or_ds": "is_hpv_positive(hpv) ? eval_cytology_ds(current_cytology, current_ds) : _cytology",
+      "has_cytology_history": "(_cytology == 'Normal' || _cytology == 'ASC-US' || _cytology == 'LSIL') && (hpv == 'None')",
+      "_cytology_history": "has_cytology_history ? cytology_history : ''"
+    },
+    {
+      "prior_hpv": "(hpv != '' && hpv != 'None') ? (prior_hpv_positive ? 'Positive' : prior_hpv_negative ? 'Negative' : 'None') : 'None'",
+      "prior_cytology": "!(hpv != '' && hpv != 'None') ? _cytology_history : prior_agc ? 'AGC' : prior_hsil ? 'HSIL' : prior_asc_h ? 'ASC-H' : prior_lsil ? 'LSIL' : prior_asc_us ? 'ASC-US' : prior_normal ? 'Normal' : 'None'",
+      "past": "prior_hpv + '/' + prior_cytology"
+    },
+    {
+      "current_cytology_count": "(current_agc ? 1 : 0) + (current_hsil ? 1: 0) + ( current_asc_h ? 1: 0) + (current_lsil ? 1 : 0) + (current_asc_us ? 1 : 0) + (current_normal ? 1 : 0)",
+      "current_ds_count": "(current_dual_stain_positive ? 1 : 0) + (current_dual_stain_negative ? 1 : 0)",
+      "prior_cytology_count": "(prior_agc ? 1 : 0) + (prior_hsil ? 1 : 0) + (prior_asc_h ? 1 : 0) + (prior_lsil ? 1: 0) + (prior_asc_us ? 1 : 0) + (prior_normal ? 1 : 0)",
+      "prior_hpv_count": "(prior_hpv_positive ? 1 : 0) + (prior_hpv_negative ? 1 : 0)"
+    }
+  ],
+  "sections": [
+    {
+      "valid": "true",
+      "title": "ASCCP HPV Primary: Screening Medications",
+      "state": "medication",
+      "content": [
+        {
+          "visible": true,
+          "type": "overlay",
+          "text": ""
+        },
+        {
+          "visible": "true",
+          "text": "Medication History",
+          "type": "switch",
+          "id": "medication_history",
+          "choices": [
+            {
+              "text": "Currently or has previously taken medication to treat ASCCP HPV Primary: Screening"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "valid": true,
+      "title": "ASCCP HPV Primary: Screening",
+      "state": "intro",
+      "content": [
+        {
+          "id": "hpv",
+          "visible": "true",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "HPV 16+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 16+"
+            },
+            {
+              "text": "HPV 18+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 18+"
+            },
+            {
+              "text": "HPV+ (untyped)"
+            },
+            {
+              "text": "HPV+ (31/33/35/39/45/51/52/58/68)"
+            },
+            {
+              "text": "HPV+ (16/18 negative, other high risk positive)"
+            },
+            {
+              "text": "HPV+ (56/59/66)"
+            },
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            },
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "cytology1",
+          "visible": "hpv == 'None'",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Current Cytology",
+          "text": "Management is based on Cytology Result.  What is the current Cytology Result?",
+          "style": "current"
+        },
+        {
+          "id": "cytology2",
+          "visible": "hpv == 'HPV-'",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            },
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Current Cytology",
+          "text": "Cytology Results can affect management, if present. What is the current Cytology Result?",
+          "style": "current"
+        },
+        {
+          "id": "current",
+          "visible": "is_hpv_positive(hpv)",
+          "type": "checkboxes",
+          "choices": [
+            {
+              "text": "Normal",
+              "value": "normal"
+            },
+            {
+              "text": "ASC-US",
+              "value": "asc_us"
+            },
+            {
+              "text": "LSIL",
+              "value": "lsil"
+            },
+            {
+              "text": "ASC-H",
+              "value": "asc_h"
+            },
+            {
+              "text": "HSIL",
+              "value": "hsil"
+            },
+            {
+              "text": "AGC",
+              "value": "agc"
+            },
+            {
+              "text": "Dual Stain Negative",
+              "value": "dual_stain_negative"
+            },
+            {
+              "text": "Dual Stain Positive",
+              "value": "dual_stain_positive"
+            }
+          ],
+          "title": "Current Results",
+          "text": "What other results does this patient have, if any? ",
+          "style": "current"
+        },
+        {
+          "id": "",
+          "visible": "current_v && current_cytology_count > 1",
+          "type": "error",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "More than one current cytology result selected.",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "current_v && current_ds_count > 1",
+          "type": "error",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "More than one current dual stain result selected.",
+          "style": ""
+        },
+        {
+          "id": "cytology",
+          "visible": "cytology1_v  || cytology2_v  || current_v",
+          "type": "derived",
+          "value": "(cytology1_v && cytology1.length) ? cytology1 : (cytology2_v && cytology2.length) ? cytology2 : (current_v && current_cytology.length) ? current_cytology : ''"
+        },
+        {
+          "id": "prior",
+          "visible": "cytology_v && ((cytology == 'Normal' || cytology == 'None' || cytology == 'ASC-US') && hpv == 'HPV-') || ((cytology == 'ASC-H or HSIL' || cytology == 'LSIL') && hpv == 'HPV-') || ((cytology == 'ASC-H' || cytology == 'ASC-US' || cytology == 'Normal' || cytology == 'None' || cytology == 'LSIL') && (hpv == 'HPV+' || hpv.startsWith('HPV+'))) && !((hpv.startsWith('HPV+')) && current_ds != 'None')",
+          "type": "checkboxes",
+          "choices": [
+            {
+              "text": "HPV Positive",
+              "value": "hpv_positive"
+            },
+            {
+              "text": "HPV Negative",
+              "value": "hpv_negative"
+            },
+            {
+              "text": "Normal",
+              "value": "normal"
+            },
+            {
+              "text": "ASC-US",
+              "value": "asc_us"
+            },
+            {
+              "text": "LSIL",
+              "value": "lsil"
+            },
+            {
+              "text": "ASC-H",
+              "value": "asc_h"
+            },
+            {
+              "text": "HSIL",
+              "value": "hsil"
+            },
+            {
+              "text": "AGC",
+              "value": "agc"
+            }
+          ],
+          "title": "Prior History",
+          "text": "Does the patient have abnormal results on the most recent prior screening? Leave blank if history is unknown or if last screen was more than approximately 5 years ago.",
+          "style": "prior"
+        },
+        {
+          "id": "",
+          "visible": "prior_v && prior_hpv_count > 1",
+          "type": "error",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "More than one prior HPV result selected.",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "prior_v && prior_cytology_count > 1",
+          "type": "error",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "More than one prior cytology result selected.",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "cytology_v && cytology == 'AGC'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management is based on current AGC Result. ",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "cytology_v && cytology != 'AGC' && prior_v && prior_agc == true",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management is based on prior AGC Result. ",
+          "style": ""
+        },
+        {
+          "id": "cytology_history",
+          "visible": "cytology_v && (cytology == 'Normal' || cytology == 'ASC-US' || cytology == 'LSIL') && (hpv == 'None')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            },
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            }
+          ],
+          "title": "Prior History",
+          "text": "Does patient have previous screening results?",
+          "style": "prior"
+        },
+        {
+          "id": "colpo_not_done1",
+          "visible": "cytology_history_v && (cytology_history == 'LSIL' || cytology_history == 'ASC-H' || cytology_history == 'AGC' || cytology_history == 'HSIL') && hpv == 'None'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Yes",
+              "img": "",
+              "alts": "",
+              "value": "Yes"
+            },
+            {
+              "text": "No",
+              "img": "",
+              "alts": "",
+              "value": "No"
+            }
+          ],
+          "title": "Colposcopy",
+          "text": "A Colposcopy was previously recommended for this result. Does the patient have a colposcopy result?",
+          "style": "colposcopy"
+        },
+        {
+          "id": "colpo_not_done2",
+          "visible": "cytology_history_v && (cytology_history == 'HSIL' || cytology_history == 'ASC-H' || (cytology_history == 'ASC-US' || cytology_history == 'LSIL')) && positive_results == 'Cytology' && (hpv.startsWith('HPV+'))",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Yes",
+              "img": "",
+              "alts": "",
+              "value": "Yes"
+            },
+            {
+              "text": "No",
+              "img": "",
+              "alts": "",
+              "value": "No"
+            }
+          ],
+          "title": "Colposcopy",
+          "text": "A Colposcopy was previously recommended for this result. Does the patient have a colposcopy result?",
+          "style": "colposcopy"
+        },
+        {
+          "id": "colpo_not_done3",
+          "visible": "prior_v && (prior_cytology == 'AGC' || prior_cytology == 'ASC-H' || prior_cytology == 'HSIL')",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Yes",
+              "img": "",
+              "alts": "",
+              "value": "Yes"
+            },
+            {
+              "text": "No",
+              "img": "",
+              "alts": "",
+              "value": "No"
+            }
+          ],
+          "title": "Colposcopy",
+          "text": "A Colposcopy was previously recommended for this result. Does the patient have a colposcopy result?",
+          "style": "colposcopy"
+        },
+        {
+          "id": "colpo_not_done",
+          "visible": "colpo_not_done1_v || colpo_not_done2_v || colpo_not_done3_v",
+          "type": "derived",
+          "value": "(colpo_not_done1_v && colpo_not_done1.length) ? colpo_not_done1 : (colpo_not_done2_v && colpo_not_done2.length) ? colpo_not_done2 : (colpo_not_done3_v && colpo_not_done3.length) ? colpo_not_done3 : ''"
+        },
+        {
+          "id": "",
+          "visible": "colpo_not_done_v && colpo_not_done == 'Yes' && (hpv.startsWith('HPV+') || hpv == 'HPV-')",
+          "type": "stop",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Please use another Clinical Situation: either Evaulation of colposcopic biopsy or Management of results during post colposcopy surveillance. ",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "colpo_not_done_v && colpo_not_done == 'Yes' && hpv == 'None'",
+          "type": "stop",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Please use another Clinical Situation: either Evaulation of colposcopic biopsy or Management of results during post colposcopy surveillance. ",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "false",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "When HPV+ results have both cytology and dual stain results, Dual Stain results are prioritized when cytology is low grade (NILM, ASC-US, or LSIL), and Cytology results are prioritized when cytology results are high grade (ASC-H, AGC, or HSIL). ",
+          "style": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "variables": {
+    "_patient_age": "",
+    "sub_age": "",
+    "partum": "None",
+    "comorbidities": "",
+    "comorbidities_childbearing": false,
+    "reproductive_active": true,
+    "pediatric_enabled": true,
+    "adolescent_enabled": false,
+    "adult_enabled": true,
+    "geriatric_enabled": true,
+    "comorbidities_enabled": true,
+    "sub_enabled": true,
+    "clinical_situation": ""
+  },
+  "derived": [
+    {
+      "patient_age": "_patient_age",
+      "diagnosis": "clinical_situation"
+    }
+  ],
+  "sections": [
+    {
+      "valid": "true",
+      "title": "Diagnosis",
+      "state": "intro",
+      "content": [
+        {
+          "visible": "true",
+          "title": "Age",
+          "type": "segment",
+          "id": "_patient_age",
+          "choices": [
+            {
+              "text": "Under 25",
+              "enabled": "true"
+            },
+            {
+              "text": "25 to 29",
+              "enabled": "true"
+            },
+            {
+              "text": "30+",
+              "enabled": "true"
+            }
+          ]
+        },
+        {
+          "visible": "true",
+          "title": "Clinical Situation",
+          "type": "choice",
+          "id": "clinical_situation",
+          "choices": [
+            {
+              "text": "Routine screening",
+              "value": "Routine screening"
+            },
+            {
+              "text": "Evaluation of a colposcopic biopsy",
+              "value": "Evaluation of a colposcopic biopsy"
+            },
+            {
+              "text": "Management of results during post colposcopy surveillance (within past 7 years)",
+              "value": "Management of results during post colposcopy surveillance (within past 7 years)"
+            },
+            {
+              "text": "Follow-up after treatment",
+              "value": "Follow-up after treatment"
+            }
+          ]
+        },
+        {
+          "visible": "true",
+          "title": "Special Situations",
+          "type": "choice",
+          "id": "clinical_situation",
+          "choices": [
+            {
+              "text": "Unsatisfactory test results",
+              "value": "Unsatisfactory test results"
+            },
+            {
+              "text": "Post hysterectomy",
+              "value": "Post hysterectomy"
+            },
+            {
+              "text": "Symptomatic patients",
+              "value": "Symptomatic patients"
+            },
+            {
+              "text": "Immunosuppressed patients",
+              "value": "Immunosuppressed patients"
+            }
+          ]
+        },
+        {
+          "visible": "clinical_situation === 'Unsatisfactory test results'",
+          "id": "",
+          "type": "stop",
+          "text": "<b>When screening test results are insufficient to provide management (e.g. unsatisfactory pap cytology), repeating the test as soon as convenient and no later than four months is recommended.</b> HPV tests are not considered valid and should be repeated if the result is invalid or the result is negative but the HPV test is part of a co-testing sample for which the cytology is unsatisfactory. Repeating a dual stain test is recommended unless the need for colposcopy can be determined from HPV genotype or cytology results alone.<br><br><a href='https://journals.lww.com/jlgtd/fulltext/2024/01000/2019_asccp_risk_based_management_consensus.2.aspx' target='_blank'>Perkins RB, Guido RS, Castle PE, et al. 2019 ASCCP Risk-Based Management Consensus Guidelines: Updates Through 2023. J Low Genit Tract Dis 2024;28:3-6.</a><br><a href='https://journals.lww.com/jlgtd/fulltext/2024/04000/recommendations_for_use_of_p16_ki67_dual_stain_for.2.aspx' target='_blank'>Clarke MA, Wentzensen N; Perkins RB, et al. Recommendations for Use of p16/Ki67 Dual Stain for Management of Individuals Testing Positive for Human Papillomavirus. J Low Genit Tract Dis 2024;28:124-130.</a>",
+          "figure": []
+        },
+        {
+          "visible": "clinical_situation === 'Post hysterectomy'",
+          "id": "",
+          "type": "stop",
+          "text": "<b>Managing Patients After Hysterectomy</b><br>Patients who undergo total hysterectomy (with removal of the cervix) should not be screened for vaginal cancer unless the following have been documented within the prior 25 years:<br>&#x2022; Histology showing CIN2, CIN3, AIS or cervical cancer, or<br>&#x2022; HSIL, AGC or persistent ASC-H cytology<br>Vaginal cancer screening involves annual HPV-based testing until 3 consecutive negative tests have been documented and should continue at 3-year intervals for 25 years from the diagnosis of the abnormality.<br><br><a href='https://journals.lww.com/jlgtd/Fulltext/2020/04000/2019_ASCCP_Risk_Based_Management_Consensus.3.aspx'>Perkins RB, Guido RS, Castle PE, et al. 2019 ASCCP risk-based management consensus guidelines for abnormal cervical cancer screening tests and cancer precursors. J Low Genit Tract Dis 2020;24:102\u201331.</a>",
+          "figure": []
+        },
+        {
+          "visible": "clinical_situation === 'Symptomatic patients'",
+          "id": "",
+          "type": "stop",
+          "text": "<b>Guidelines apply to asymptomatic patients that require management of abnormal cervical screening test results.</b><br>Patients with symptoms such as abnormal uterine or vaginal bleeding or a visibly abnormal-appearing cervix require appropriate diagnostic testing as this may be a sign of cancer. This evaluation may include cervical cytology, colposcopy, diagnostic imaging, and cervical, endocervical, or endometrial biopsy. Guidelines cannot cover all clinical situations and clinical judgment is advised, especially in those circumstances which are not covered by the 2019 guidelines.<br><br><a href='https://journals.lww.com/jlgtd/Fulltext/2020/04000/2019_ASCCP_Risk_Based_Management_Consensus.3.aspx'>Perkins RB, Guido RS, Castle PE, et al. 2019 ASCCP risk-based management consensus guidelines for abnormal cervical cancer screening tests and cancer precursors. J Low Genit Tract Dis 2020;24:102\u201331.</a>",
+          "figure": []
+        },
+        {
+          "visible": "clinical_situation === 'Immunosuppressed patients'",
+          "id": "",
+          "type": "stop",
+          "text": "<b>Managing Patients With Immunosuppression</b><br><br><b>Screening</b><br>Cervical cancer screening and abnormal result management recommendations for immunocompromised individuals without HIV use the guidelines developed for people living with HIV:<br>&#x2022; Cytology only screening should begin at age 21<br>&#x2022; Continue cytology only annually for 3 years<br>&#x2022; Continue every 3 years (cytology only) until the age of 30 years<br>&#x2022; Cytology alone or cotesting every 3 years after the age of 30 years for the patient's lifetime.<br><br><b>Management of Abnormal Results</b><br>In immunocompromised patients of any age, colposcopy referral is recommended for all results of HPV-positive ASC-US or higher.<br>&#x2022; If HPV testing is not performed on ASC-US results, then repeat cytology in 6 to 12 months is recommended, with colposcopy referral for ASC-US or higher.<br>&#x2022; For any result of ASC-US or higher on repeat cytology or if HPV positive, referral to colposcopy is recommended.<br>&#x2022; For all cytology results of LSIL or worse (including ASC-H, AGC, AIS, and HSIL), referral to colposcopy is recommended regardless of HPV test result if done.<br><br><a href='https://journals.lww.com/jlgtd/fulltext/2024/01000/2019_asccp_risk_based_management_consensus.2.aspx' target='_blank'>Perkins RB, Guido RS, Castle PE, et al. 2019 ASCCP Risk-Based Management Consensus Guidelines: Updates Through 2023. J Low Genit Tract Dis 2024;28:3-6.</a>",
+          "figure": []
+        }
+      ]
+    }
+  ]
+}

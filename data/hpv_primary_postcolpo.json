@@ -1,0 +1,951 @@
+{
+  "variables": {
+    "hpv1": "",
+    "hpv2": "",
+    "hpv3": "",
+    "hpv4": "",
+    "hpv5": "",
+    "hpv": "None",
+    "second1": "",
+    "second2": "",
+    "second": "",
+    "treatment1": "",
+    "treatment2": "",
+    "treatment3": "",
+    "treatment4": "",
+    "treatment": "",
+    "sixteen": "",
+    "eighteen": "",
+    "cytology": "",
+    "cytology_history": "",
+    "colpo_not_done": "",
+    "end_result": "",
+    "history": "",
+    "hpv_history": "",
+    "low_grade_history": "",
+    "high_grade_history": "",
+    "negative_no_history": "",
+    "high_grade": "",
+    "agc": "",
+    "agc_past": "",
+    "positive_results": "",
+    "hpvnon": "",
+    "positive_history": "",
+    "dual_stain": "",
+    "pos_both": "",
+    "prior": "",
+    "prior1": "",
+    "prior2": "",
+    "situation": "",
+    "current_hpv": "",
+    "current_cytology": "",
+    "short": "",
+    "_current_both": "",
+    "_current_ds": "",
+    "_cytology": "",
+    "medCount": 0
+  },
+  "derived": [
+    {
+      "function1": "is_hpv_genotyped = (r) => r == 'HPV 16+' || r == 'HPV 18+'",
+      "function2": "is_hpv_positive = (r) => is_hpv_genotyped(r) || r.startsWith('HPV+')"
+    },
+    {
+      "situation": "clinical_situation.indexOf('treatment') >= 0 ? 'posttreatment' : 'postcolposcopy'",
+      "_colpo": "second == 'No CIN' ? 'NO CIN' : second == 'Histologic LSIL (CIN 1)' ? 'CIN 1' : second == 'Histologic HSIL (CIN 2)' ? 'CIN 2' : second == 'Histologic HSIL (CIN 3 or Unspecified)' ? 'CIN 3' : second == 'AIS' ? 'AIS' : ''",
+      "colpo": "situation == 'postcolposcopy' ? _colpo : ((_colpo == 'NO CIN' || _colpo == 'CIN 1') && ['ASC-H', 'HSIL', 'AGC'].indexOf(treatment) >= 0) ? 'CIN01H' : _colpo",
+      "current_hpv": "hpv",
+      "current_cytology": "positive_results == 'None' ? 'None' : cytology"
+    },
+    {
+      "_current_both": "(is_hpv_positive(hpv) && patient_age != 'Under 25' && positive_results == 'Both') ? pos_both : (positive_results == 'None' ? 'None' : cytology)",
+      "_current_ds": "(is_hpv_positive(hpv) && patient_age != 'Under 25' && positive_results == 'Dual Stain') ? dual_stain : 'None'"
+    },
+    {
+      "_cytology": "_current_ds  != 'None' ? _current_ds : _current_both",
+      "short": "situation == 'posttreatment' ? 'Post-treatment' : 'Post-colposcopy'"
+    }
+  ],
+  "sections": [
+    {
+      "valid": "true",
+      "title": "ASCCP HPV Primary: Post Colpo Medications",
+      "state": "medication",
+      "content": [
+        {
+          "visible": true,
+          "type": "overlay",
+          "text": ""
+        },
+        {
+          "visible": "true",
+          "text": "Medication History",
+          "type": "switch",
+          "id": "medication_history",
+          "choices": [
+            {
+              "text": "Currently or has previously taken medication to treat ASCCP HPV Primary: Post Colpo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "valid": true,
+      "title": "ASCCP HPV Primary: Post Colpo",
+      "state": "intro",
+      "content": [
+        {
+          "id": "second1",
+          "visible": "situation == 'postcolposcopy'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "No CIN",
+              "img": "",
+              "alts": "",
+              "value": "No CIN"
+            },
+            {
+              "text": "Histologic LSIL (CIN 1)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic LSIL (CIN 1)"
+            },
+            {
+              "text": "Histologic HSIL (CIN 2)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic HSIL (CIN 2)"
+            },
+            {
+              "text": "Histologic HSIL (CIN 3 or Unspecified)"
+            },
+            {
+              "text": "AIS",
+              "img": "",
+              "alts": "",
+              "value": "AIS"
+            }
+          ],
+          "title": "Colposcopy",
+          "text": "",
+          "style": "colposcopy"
+        },
+        {
+          "id": "second2",
+          "visible": "situation == 'posttreatment'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "No CIN",
+              "img": "",
+              "alts": "",
+              "value": "No CIN"
+            },
+            {
+              "text": "Histologic LSIL (CIN 1)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic LSIL (CIN 1)"
+            },
+            {
+              "text": "Histologic HSIL (CIN 2)",
+              "img": "",
+              "alts": "",
+              "value": "Histologic HSIL (CIN 2)"
+            },
+            {
+              "text": "Histologic HSIL (CIN 3 or Unspecified)"
+            },
+            {
+              "text": "AIS",
+              "img": "",
+              "alts": "",
+              "value": "AIS"
+            }
+          ],
+          "title": "Treated Histology",
+          "text": "",
+          "style": "treated"
+        },
+        {
+          "id": "second",
+          "visible": "second1_v || second2_v ",
+          "type": "derived",
+          "value": "(second1_v && second1.length) ? second1 : (second2_v && second2.length) ? second2 :  '' "
+        },
+        {
+          "id": "treatment1",
+          "visible": "situation == 'posttreatment' && (second == 'No CIN' || second == 'Histologic LSIL (CIN 1)')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Cytology preceding treatment",
+          "text": "Management of &lt;CIN 2 is based on the previous cytology result. What was the cytology preceding treatment?",
+          "style": "prior_cyto"
+        },
+        {
+          "id": "treatment2",
+          "visible": "situation == 'postcolposcopy' && (second == 'No CIN' || second == 'Histologic LSIL (CIN 1)')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Cytology preceding colposcopy",
+          "text": "Management of CIN 1 or lesser is based on the previous cytology result. What was the cytology preceding colposcopy?",
+          "style": "prior_cyto"
+        },
+        {
+          "id": "treatment3",
+          "visible": "situation == 'postcolposcopy' && (second == 'Histologic HSIL (CIN 3 or Unspecified)' || second == 'AIS' ) ",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Yes",
+              "img": "",
+              "alts": "",
+              "value": "Yes"
+            },
+            {
+              "text": "No",
+              "img": "",
+              "alts": "",
+              "value": "No"
+            }
+          ],
+          "title": "Treatment",
+          "text": "Treatment was previously recommended for this result. Did the patient recieve treatment?",
+          "style": "treated"
+        },
+        {
+          "id": "treatment4",
+          "visible": "situation == 'postcolposcopy' && second == 'Histologic HSIL (CIN 2)'",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Yes- Treatment"
+            },
+            {
+              "text": "No- Observation"
+            }
+          ],
+          "title": "Treatment/Observation",
+          "text": "Treatment or Observation was previously recommended for Histologic HSIL (CIN 2). Did the patient recieve treatment?",
+          "style": "colposcopy"
+        },
+        {
+          "id": "treatment",
+          "visible": "treatment1_v || treatment2_v || treatment3_v || treatment4_v",
+          "type": "derived",
+          "value": "(treatment1_v && treatment1.length) ? treatment1 : (treatment2_v && treatment2.length) ? treatment2 : (treatment3_v && treatment3.length) ? treatment3 :  (treatment4_v && treatment4.length) ? treatment4 :  ''"
+        },
+        {
+          "id": "",
+          "visible": "treatment_v && treatment == 'No' && second != 'Histologic HSIL (CIN 2)'",
+          "type": "stop",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "No clinical guidelines available",
+          "style": ""
+        },
+        {
+          "id": "",
+          "visible": "situation == 'postcolposcopy' && ((treatment_v && treatment == 'Yes' && second != 'Histologic HSIL (CIN 2)') || (treatment_v && treatment == 'Yes- Treatment' && second == 'Histologic HSIL (CIN 2)'))",
+          "type": "stop",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Please use another Clinical Situation: Follow up after treatment",
+          "style": ""
+        },
+        {
+          "id": "hpv1",
+          "visible": "treatment_v && situation == 'postcolposcopy' && treatment != '' && (second == 'No CIN' ||  second ==  'Histologic LSIL (CIN 1)' ||  treatment == 'Yes-Treatment') && (patient_age != 'Under 25') && (treatment == \"Normal\" || treatment == \"ASC-US\" || treatment == \"LSIL\")",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "HPV 16+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 16+"
+            },
+            {
+              "text": "HPV 18+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 18+"
+            },
+            {
+              "text": "HPV+ (untyped)"
+            },
+            {
+              "text": "HPV+ (31/33/35/39/45/51/52/58/68)"
+            },
+            {
+              "text": "HPV+ (16/18 negative, other high risk positive)"
+            },
+            {
+              "text": "HPV+ (56/59/66)"
+            },
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "hpv2",
+          "visible": "treatment_v && situation == 'postcolposcopy' && treatment != '' && (second == 'No CIN' ||  second ==  'Histologic LSIL (CIN 1)' ||  treatment == 'Yes-Treatment') && (patient_age != 'Under 25') && treatment != \"Normal\" && treatment != \"ASC-US\" && treatment != \"LSIL\" && treatment != \"AGC\"",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            },
+            {
+              "text": "HPV+ (untyped or other genotyping)",
+              "img": "Positive",
+              "alts": "",
+              "value": "HPV+ (untyped or other genotyping)"
+            },
+            {
+              "text": "HPV 16+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 16+"
+            },
+            {
+              "text": "HPV 18+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 18+"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "agc",
+          "visible": "treatment_v && (second == 'No CIN' || second ==  'Histologic LSIL (CIN 1)') && treatment == 'AGC' ",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Cotest at 1 and 2 years is the guidance for all age groups. Data is not available for genotyped HPV Results.",
+          "style": ""
+        },
+        {
+          "id": "hpv3",
+          "visible": "treatment_v && (second == 'No CIN' || second ==  'Histologic LSIL (CIN 1)') && treatment == 'AGC'  && (patient_age != 'Under 25')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "HPV+",
+              "img": "Positive",
+              "alts": "",
+              "value": "HPV+"
+            },
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "hpv4",
+          "visible": "situation == 'posttreatment' && second != '' && second != 'AIS' && second != 'No CIN' && second != 'Histologic LSIL (CIN 1)' && (patient_age != 'Under 25') && (!treatment_v || treatment != 'AGC')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            },
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            },
+            {
+              "text": "HPV+ (untyped or other genotyping)",
+              "img": "Positive",
+              "alts": "",
+              "value": "HPV+ (untyped or other genotyping)"
+            },
+            {
+              "text": "HPV 16+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 16+"
+            },
+            {
+              "text": "HPV 18+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 18+"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "hpv5",
+          "visible": "situation == 'posttreatment' && (second == 'No CIN' || second == 'Histologic LSIL (CIN 1)') && (patient_age != 'Under 25') && (!treatment_v || treatment != 'AGC')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "HPV-",
+              "img": "Negative",
+              "alts": "",
+              "value": "HPV-"
+            },
+            {
+              "text": "HPV+ (untyped or other genotyping)",
+              "img": "Positive",
+              "alts": "",
+              "value": "HPV+ (untyped or other genotyping)"
+            },
+            {
+              "text": "HPV 16+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 16+"
+            },
+            {
+              "text": "HPV 18+",
+              "img": "Positive",
+              "alts": "Negative",
+              "value": "HPV 18+"
+            }
+          ],
+          "title": "Current HPV",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "hpv",
+          "visible": "hpv1_v  || hpv2_v || hpv3_v || hpv4_v || hpv5_v",
+          "type": "derived",
+          "value": "(hpv1_v && hpv1.length) ? hpv1 : (hpv2_v && hpv2.length) ? hpv2 : (hpv3_v && hpv3.length) ? hpv3 : (hpv4_v && hpv4.length) ? hpv4 : (hpv5_v && hpv5.length) ? hpv5 : \"\""
+        },
+        {
+          "id": "sixteen",
+          "visible": "hpv_v && hpv == 'HPV 16+' && treatment != 'AGC'  && false",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management is based on current HPV 16+ Result.",
+          "style": ""
+        },
+        {
+          "id": "eighteen",
+          "visible": "hpv_v && hpv == 'HPV 18+' && treatment != 'AGC' && false",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management is based on current HPV 18+ Result. ",
+          "style": ""
+        },
+        {
+          "id": "cytology",
+          "visible": "hpv_v && (hpv == 'HPV-' && patient_age != 'Under 25')  ",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            },
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Current Cytology",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "positive_results",
+          "visible": "hpv_v && is_hpv_positive(hpv) && patient_age != 'Under 25'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "None",
+              "img": "None",
+              "alts": "",
+              "value": "None"
+            },
+            {
+              "text": "Cytology",
+              "img": "",
+              "alts": "",
+              "value": "Cytology"
+            },
+            {
+              "text": "Dual Stain",
+              "img": "DS",
+              "alts": "",
+              "value": "Dual Stain"
+            },
+            {
+              "text": "Both",
+              "img": "",
+              "alts": "",
+              "value": "Both"
+            }
+          ],
+          "title": "Current Results",
+          "text": "A Postive HPV Result needs further testing for triage. What other current results does this patient have? ",
+          "style": "current"
+        },
+        {
+          "id": "cytology",
+          "visible": "(hpv_v && is_hpv_positive(hpv) && (positive_results_v && positive_results == 'Cytology') ||  ((second == 'No CIN' ||  second ==  'Histologic LSIL (CIN 1)') && patient_age == 'Under 25')) || (situation == 'posttreatment' && second != '' && patient_age == 'Under 25') || (hpv_v && hpv == 'None')",
+          "type": "horizontal",
+          "choices": [
+            {
+              "text": "Normal",
+              "img": "Normal",
+              "alts": "",
+              "value": "Normal"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Current Cytology",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "dual_stain",
+          "visible": "positive_results_v && positive_results == 'Dual Stain'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Dual Stain +",
+              "img": "",
+              "alts": "",
+              "value": "Dual Stain +"
+            },
+            {
+              "text": "Dual Stain -",
+              "img": "",
+              "alts": "",
+              "value": "Dual Stain -"
+            }
+          ],
+          "title": "Current Dual Stain",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "",
+          "visible": "positive_results_v && positive_results == 'Both'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "When HPV+ results have both cytology and dual stain results, Dual Stain results are prioritized when cytology is low grade (NILM, ASC-US, or LSIL), and Cytology results are prioritized when cytology results are high grade (ASC-H, AGC, or HSIL). ",
+          "style": ""
+        },
+        {
+          "id": "pos_both",
+          "visible": "positive_results_v && positive_results == 'Both'",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "Dual Stain + (low grade cytology)",
+              "img": "",
+              "alts": "",
+              "value": "Dual Stain + (low grade cytology)"
+            },
+            {
+              "text": "Dual Stain - (low grade cytology)",
+              "img": "",
+              "alts": "",
+              "value": "Dual Stain - (low grade cytology)"
+            },
+            {
+              "text": "ASC-H",
+              "img": "ASC-H",
+              "alts": "",
+              "value": "ASC-H"
+            },
+            {
+              "text": "HSIL",
+              "img": "HSIL",
+              "alts": "",
+              "value": "HSIL"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Current",
+          "text": "",
+          "style": "current"
+        },
+        {
+          "id": "",
+          "visible": "",
+          "type": "",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "",
+          "style": ""
+        },
+        {
+          "id": "prior1",
+          "visible": "treatment_v && (treatment == 'ASC-US' || treatment == 'LSIL' || treatment == 'Normal') && ((hpv.startsWith('HPV+ (')  ||  hpv == 'HPV+')  && (cytology == 'Normal' || cytology == 'ASC-US' || cytology == 'LSIL'))",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "No prior screening",
+              "img": "",
+              "alts": "",
+              "value": "No prior screening"
+            },
+            {
+              "text": "Normal/Negative Results",
+              "img": "",
+              "alts": "",
+              "value": "Normal/Negative Results"
+            },
+            {
+              "text": "HPV+ (with Low Grade cytology)",
+              "img": "",
+              "alts": "",
+              "value": "HPV+ (with Low Grade cytology)"
+            },
+            {
+              "text": "HPV- (with Low Grade Cytologies only)",
+              "img": "",
+              "alts": "",
+              "value": "HPV- (with Low Grade Cytologies only)"
+            },
+            {
+              "text": "High Grade Cytologies (ASC-H or higher)",
+              "img": "",
+              "alts": "",
+              "value": "High Grade Cytologies (ASC-H or higher)"
+            },
+            {
+              "text": "AGC Cytology",
+              "img": "",
+              "alts": "",
+              "value": "AGC Cytology"
+            }
+          ],
+          "title": "Prior History",
+          "text": "Does patient have a prior screening with HPV positive results and/or abnormal cytology since colpscopy?",
+          "style": "prior"
+        },
+        {
+          "id": "prior2",
+          "visible": "treatment_v && ((treatment == 'ASC-US' || treatment == 'LSIL' || treatment == 'Normal' || treatment == 'HSIL' || treatment == 'ASC-H') && (hpv == 'HPV-' || ((hpv.startsWith('HPV+ (') ||  hpv == 'HPV+') && (treatment == 'ASC-H' || treatment == 'HSIL'))) && (cytology == 'None' || cytology == 'Normal' || cytology == 'ASC-US' || cytology == 'LSIL'))",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "No History",
+              "img": "",
+              "alts": "",
+              "value": "No History"
+            },
+            {
+              "text": "No History of Abnormalities",
+              "img": "",
+              "alts": "",
+              "value": "No History of Abnormalities"
+            },
+            {
+              "text": "Yes- History of Abnormality",
+              "img": "",
+              "alts": "",
+              "value": "Yes- History of Abnormality"
+            }
+          ],
+          "title": "Prior History",
+          "text": "Does patient have a prior screening with HPV positive results and/or abnormal cytology since colpscopy?",
+          "style": "prior"
+        },
+        {
+          "id": "prior",
+          "visible": "prior1_v || prior2_v",
+          "type": "derived",
+          "value": "(prior1_v && prior1.length) ? prior1 : (prior2_v && prior2.length) ? prior2 : ''"
+        },
+        {
+          "id": "hpv_history",
+          "visible": "prior_v && prior == 'Yes- HPV+ (with any cytology result)'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management of Low Grade Cytology with a history of HPV+",
+          "style": ""
+        },
+        {
+          "id": "low_grade_history",
+          "visible": "prior_v && prior == 'Yes- Low Grade Cytologies only (ASC-US or LSIL)'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management of Persistant Low Grade Cytology",
+          "style": ""
+        },
+        {
+          "id": "high_grade_history",
+          "visible": "prior_v && prior == 'Yes- High Grade Cytologies only (ASC-H or HSIL)'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management of Low Grade Cytology with a history of High Grade Cytology",
+          "style": ""
+        },
+        {
+          "id": "negative_no_history",
+          "visible": "prior_v && prior == 'No'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management of HPV- with no history of abnormalities ",
+          "style": ""
+        },
+        {
+          "id": "high_grade",
+          "visible": "hpv == 'Cytology of ASC-H or HSIL'",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management of ASC-H or HSIL, HPV- ",
+          "style": ""
+        },
+        {
+          "id": "agc_past",
+          "visible": "prior_v && (prior == 'Yes- AGC Cytology' || prior == 'AGC Cytology')",
+          "type": "overlay",
+          "choices": [
+            {
+              "text": ""
+            }
+          ],
+          "text": "Management is based on prior AGC Result. ",
+          "style": ""
+        },
+        {
+          "id": "cytology_history",
+          "visible": "false && (cytology == 'Normal' || cytology == 'ASC-US' || cytology == 'LSIL') && (positive_results_v && positive_results == 'Cytology') && hpv.startsWith('HPV+ (')",
+          "type": "choice",
+          "choices": [
+            {
+              "text": "No History of Abnormal Results"
+            },
+            {
+              "text": "ASC-US",
+              "img": "ASC-US",
+              "alts": "",
+              "value": "ASC-US"
+            },
+            {
+              "text": "LSIL",
+              "img": "LSIL",
+              "alts": "",
+              "value": "LSIL"
+            },
+            {
+              "text": "High Grade Cytology"
+            },
+            {
+              "text": "AGC",
+              "img": "AGC",
+              "alts": "",
+              "value": "AGC"
+            }
+          ],
+          "title": "Prior History",
+          "text": "Does patient have a prior screening results since colpscopy?",
+          "style": ""
+        }
+      ]
+    }
+  ]
+}

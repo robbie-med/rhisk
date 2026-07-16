@@ -1,0 +1,155 @@
+/* papcalc — stylesheet */
+:root {
+  --blue: #2f6e9c;
+  --green: #85bb5f;
+  --orange: #f2aa14;
+  --purple: #8048ca;
+  --red: #db5d3b;
+  --bg: #f9fafb;
+  --card: #fff;
+  --text: #212529;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --radius: 8px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);margin:0;padding:0;color:var(--text);min-width:320px;line-height:1.5}
+
+/* Layout */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:280px;background:#1a1a2e;color:#ccc;padding:12px;flex-shrink:0;display:flex;flex-direction:column;font-size:.85rem;max-height:100vh;overflow-y:auto}
+.sidebar h3{color:#fff;font-size:.9rem;margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #333}
+.main{flex:1;max-width:900px;margin:0 auto;padding:16px;width:100%}
+
+/* Header */
+.header{background:var(--blue);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-radius:var(--radius)}
+.header h1{font-size:1.1rem;margin:0;font-weight:600}
+.header-actions{display:flex;gap:8px}
+.header-actions button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:.8rem}
+.header-actions button:hover{background:rgba(255,255,255,.25)}
+
+/* Steps */
+.steps{display:flex;gap:3px;margin:0 0 16px 0;flex-wrap:wrap}
+.step{flex:1;min-width:50px;text-align:center;padding:6px 4px;font-size:.7rem;font-weight:600;color:#fff;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-active{background:var(--blue)}
+.step-prior{background:var(--green)}
+.step-colposcopy{background:var(--orange)}
+.step-abnormal{background:var(--purple)}
+.step-treatment{background:var(--red)}
+.step-inactive{background:#ccc;color:#666}
+
+/* Cards */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card-title{font-size:.8rem;font-weight:600;color:var(--blue);text-transform:uppercase;margin-bottom:12px;letter-spacing:.5px}
+.card-text{font-size:1rem;margin-bottom:16px;line-height:1.6}
+.card-text b{color:var(--blue)}
+
+/* Patient info panel */
+.patient-panel{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.patient-panel h3{font-size:.85rem;color:var(--blue);margin:0 0 4px 0}
+.patient-panel .hint{font-size:.75rem;color:var(--muted);margin-bottom:10px}
+.patient-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.patient-field{display:flex;flex-direction:column}
+.patient-field label{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
+.patient-field input,.patient-field select,.patient-field textarea{font-size:.85rem;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;width:100%}
+.patient-field textarea{resize:vertical;min-height:50px}
+.patient-notes{grid-column:1/-1}
+
+/* Choice buttons */
+.choice-list{display:flex;flex-direction:column;gap:8px}
+.choice-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;text-align:left;font-size:.95rem;transition:all .15s;width:100%}
+.choice-btn:hover{border-color:var(--blue);background:#f0f6fb}
+.choice-btn.selected{border-color:var(--blue);background:#e8f0f8}
+.choice-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Segment buttons */
+.segment-list{display:flex;gap:8px;flex-wrap:wrap}
+.segment-btn{padding:10px 20px;border:2px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;font-size:.95rem;transition:all .15s}
+.segment-btn:hover{border-color:var(--blue)}
+.segment-btn.selected{border-color:var(--blue);background:var(--blue);color:#fff}
+.segment-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Switch */
+.switch-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+.switch-item:last-child{border-bottom:none}
+.switch-label{font-size:.9rem}
+.switch-track{width:48px;height:26px;background:#ccc;border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.switch-track.on{background:var(--blue)}
+.switch-track::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
+.switch-track.on::after{left:25px}
+
+/* Stop / info */
+.stop-card{background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.stop-card .stop-title{font-weight:600;color:#856404;margin-bottom:8px}
+
+/* Recommendation */
+.rec-card{background:var(--card);border-radius:var(--radius);padding:24px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.rec-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.rec-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.rec-icon.colposcopy{background:#fff3cd;color:var(--orange)}
+.rec-icon.treatment{background:#fde8e4;color:var(--red)}
+.rec-icon.surveillance{background:#e8f5e9;color:var(--green)}
+.rec-icon.screening{background:#e3f0f9;color:var(--blue)}
+.rec-title{font-size:1.1rem;font-weight:700;color:var(--blue)}
+.rec-subtitle{font-size:.85rem;color:var(--muted)}
+.rec-text{line-height:1.7;margin-bottom:16px}
+.rec-text p{margin:0 0 8px 0}
+.rec-risk{margin:20px 0}
+.rec-risk-label{font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.rec-risk-bar{height:28px;background:#e9ecef;border-radius:14px;overflow:hidden;position:relative}
+.rec-risk-fill{height:100%;border-radius:14px;transition:width .5s ease;min-width:2px}
+.rec-risk-fill.low{background:var(--green)}
+.rec-risk-fill.med{background:var(--orange)}
+.rec-risk-fill.high{background:var(--red)}
+.rec-risk-threshold{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.2)}
+.rec-risk-threshold.t4{left:8%}
+.rec-risk-threshold.t25{left:50%}
+.rec-risk-threshold.t60{left:120%}
+.rec-risk-value{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.85rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.rec-reference{font-size:.75rem;color:var(--muted);margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+
+/* Nav */
+.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.btn{padding:10px 24px;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;display:inline-block}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#256089}
+.btn-secondary{background:#e9ecef;color:#495057}
+.btn-secondary:hover{background:#dee2e6}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#c44d32}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Patient list in sidebar */
+.patient-list{list-style:none;padding:0;margin:0}
+.patient-item{padding:8px 10px;border-radius:4px;cursor:pointer;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.patient-item:hover{background:#2a2a4a}
+.patient-item.active{background:var(--blue)}
+.patient-item .name{font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.patient-item .date{font-size:.7rem;color:#888;margin-left:8px}
+.patient-item .del-btn{background:none;border:none;color:#666;cursor:pointer;font-size:.8rem;padding:2px 6px;opacity:0;transition:opacity .15s}
+.patient-item:hover .del-btn{opacity:1}
+.patient-item .del-btn:hover{color:var(--red)}
+.sidebar-actions{display:flex;gap:6px;margin-top:8px}
+.sidebar-actions button{flex:1;font-size:.75rem;padding:6px 8px;background:#333;border:1px solid #444;color:#ccc;border-radius:4px;cursor:pointer}
+.sidebar-actions button:hover{background:#444}
+.no-patients{font-size:.8rem;color:#888;padding:16px 0;text-align:center}
+
+/* Footer */
+.footer{text-align:center;padding:16px;font-size:.75rem;color:var(--muted);margin-top:32px}
+.footer a{color:var(--blue)}
+
+/* Share modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:500px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h3{margin:0 0 12px 0}
+.modal input{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:.9rem;margin-bottom:12px}
+.modal .btn-row{display:flex;gap:8px;justify-content:flex-end}
+
+@media(max-width:768px){
+  .app-shell{flex-direction:column}
+  .sidebar{width:100%;max-height:none;order:2}
+  .main{order:1}
+  .patient-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
