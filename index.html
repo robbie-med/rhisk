@@ -198,7 +198,7 @@ function renderContent() {
       case 'collapse_segment': html += renderCollapse(item); break;
       default:
         if (item.text && item.text.length) {
-          html += `<div class="card"><div class="card-text">${item.text.join('<br>')}</div></div>`;
+          html += `<div class="card"><div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div></div>`;
         }
     }
   }
@@ -215,7 +215,7 @@ function renderSegment(item) {
 
   return `<div class="card">
     <div class="card-title">${item.title || ''}</div>
-    <div class="card-text">${item.text.join('<br>')}</div>
+    <div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>
     <div class="segment-list">${choices}</div>
   </div>`;
 }
@@ -229,14 +229,14 @@ function renderChoice(item) {
 
   return `<div class="card">
     <div class="card-title">${item.title || ''}</div>
-    <div class="card-text">${item.text.join('<br>')}</div>
+    <div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>
     <div class="choice-list">${choices}</div>
   </div>`;
 }
 
 function renderRadio(item) {
   let html = `<div class="card"><div class="card-title">${item.title || ''}</div>`;
-  if (item.text) html += `<div class="card-text">${item.text.join('<br>')}</div>`;
+  if (item.text) html += `<div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>`;
 
   if (item.groups) {
     for (const group of item.groups) {
@@ -260,7 +260,7 @@ function renderRadio(item) {
 
 function renderSwitch(item) {
   let html = `<div class="card"><div class="card-title">${item.title || ''}</div>`;
-  if (item.text) html += `<div class="card-text">${item.text.join('<br>')}</div>`;
+  if (item.text) html += `<div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>`;
 
   for (const c of item.choices) {
     const checked = item.checked && item.checked.includes(c.value);
@@ -276,7 +276,7 @@ function renderSwitch(item) {
 function renderStop(item) {
   return `<div class="stop-card">
     <div class="stop-title">${item.title || 'Clinical Note'}</div>
-    <div>${item.text.join('<br>')}</div>
+    <div>${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>
   </div>`;
 }
 
@@ -286,7 +286,7 @@ function renderCollapse(item) {
       ▶ ${item.title || 'Details'}
     </div>
     <div class="hidden" style="margin-top:8px">
-      <div class="card-text">${item.text.join('<br>')}</div>`;
+      <div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>`;
   if (item.choices) {
     html += `<div class="choice-list">${item.choices.map(c => {
       return `<button class="choice-btn" data-id="${item.id}" data-val="${c.value}">${c.text}</button>`;
