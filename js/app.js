@@ -157,7 +157,9 @@ const App = (function() {
   }
 
   function setAnswer(id, value) {
+    console.log('SET_ANSWER:', id, '=', JSON.stringify(value), 'current:', JSON.stringify(Engine.getVariable(id)));
     Engine.setVariable(id, value);
+    console.log('AFTER_SET:', id, '=', JSON.stringify(Engine.getVariable(id)));
     if (id === '_patient_age') state.patientAge = value;
     if (id === 'clinical_situation') state.diagnosis = value;
     // Re-evaluate current state to update derived vars and visibility
