@@ -302,6 +302,7 @@ const Engine = (function() {
     }
 
     console.log('BODY_EVAL:', JSON.stringify(fn.body), 'vars.r:', JSON.stringify(vars['r']));
+    console.log('RAW_COMPARE:', vars['r'] === 'HPV 16+', 'len:', vars['r']?.length, 'charCodes:', [...(vars['r']||'')].map(c=>c.charCodeAt(0)));
     const result = evaluateExpr(fn.body);
     console.log('BODY_RESULT:', result);
     console.log('CALL_FN_RESULT:', name, '=>', result);
