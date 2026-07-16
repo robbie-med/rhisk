@@ -298,7 +298,7 @@ const Engine = (function() {
     for (let i = 0; i < fn.params.length; i++) {
       saved[fn.params[i]] = vars[fn.params[i]];
       vars[fn.params[i]] = args[i] !== undefined ? args[i] : null;
-      console.log('SET_PARAM:', fn.params[i], '=', JSON.stringify(vars[fn.params[i]]));
+      console.log('SET_PARAM:', name, fn.params[i], '=', JSON.stringify(vars[fn.params[i]]), 'from args:', JSON.stringify(args[i]));
     }
 
     console.log('BODY_EVAL:', JSON.stringify(fn.body), 'vars.r:', JSON.stringify(vars['r']));
