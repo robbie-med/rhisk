@@ -212,6 +212,7 @@ const Engine = (function() {
 
     // Registered function calls: funcName(arg1, arg2, ...)
     const funcMatch = expr.match(/^(\w+)\((.+)\)$/);
+    if (funcMatch) console.log('FUNC_CALL:', funcMatch[1], 'args:', funcMatch[2], 'registered:', !!funcRegistry[funcMatch[1]]);
     if (funcMatch && funcRegistry[funcMatch[1]]) {
       const funcName = funcMatch[1];
       const argsStr = funcMatch[2];
@@ -227,7 +228,9 @@ const Engine = (function() {
         }
       }
       args.push(argsStr.substring(last).trim());
-      return callFunction(funcName, args.map(a => evalAtomic(a)));
+      const result = callFunction(funcName, args.map(a => evalAtomic(a)));
+      console.log('FUNC_RESULT:', funcName, '=>', result);
+      return result;
     }
 
     // Variable lookup
