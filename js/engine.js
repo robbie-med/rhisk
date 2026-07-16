@@ -150,9 +150,6 @@ const Engine = (function() {
         switch (op) {
           case '===': return left === right;
           case '!==': return left !== right;
-          case '==': console.log('CMP ==:', JSON.stringify(left), '==', JSON.stringify(right), '=', left == right); return left == right;
-          case '!=': return left != right;
-          case '>=': return Number(left) >= Number(right);
           case '<=': return Number(left) <= Number(right);
           case '>': return Number(left) > Number(right);
           case '<': return Number(left) < Number(right);
@@ -301,7 +298,6 @@ const Engine = (function() {
 
   // Call a registered function
   function callFunction(name, args) {
-    console.log('CALL_FN:', name, 'args:', JSON.stringify(args), 'params:', JSON.stringify(funcRegistry[name]?.params), 'body:', JSON.stringify(funcRegistry[name]?.body));
     const fn = funcRegistry[name];
     if (!fn) return undefined;
 
@@ -310,11 +306,8 @@ const Engine = (function() {
     for (let i = 0; i < fn.params.length; i++) {
       saved[fn.params[i]] = vars[fn.params[i]];
       vars[fn.params[i]] = args[i] !== undefined ? args[i] : null;
-      console.log('SET_PARAM:', name, fn.params[i], '=', JSON.stringify(vars[fn.params[i]]), 'from args:', JSON.stringify(args[i]));
     }
 
-    console.log('BODY_EVAL:', JSON.stringify(fn.body), 'vars.r:', JSON.stringify(vars['r']));
-    console.log('RAW_COMPARE:', vars['r'] === 'HPV 16+', 'len:', vars['r']?.length, 'charCodes:', [...(vars['r']||'')].map(c=>c.charCodeAt(0)));
     const result = evaluateExpr(fn.body);
     // Restore
     for (let i = 0; i < fn.params.length; i++) {
