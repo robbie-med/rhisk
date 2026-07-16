@@ -150,6 +150,8 @@ function render() {
 
   renderSteps();
   renderContent();
+  // DEBUG: dump engine vars
+  try { const ev = Engine.getVars(); console.log('ENGINE hpv:', ev.hpv, 'hpv_v:', ev.hpv_v, 'current_v:', ev.current_v, 'is_hpv_positive registered:', typeof ev.hpv === 'string'); } catch(e) { console.log('engine err:', e.message); }
   renderNav();
   updatePatientInfoFields();
 }
