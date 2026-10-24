@@ -2,490 +2,58 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>PapCalc — Open Source ASCCP Management Guidelines</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rhisk — ASCCP risk-based management</title>
+<meta name="description" content="Open-source calculator for the 2019 ASCCP risk-based management guidelines for abnormal cervical cancer screening results.">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="app-shell">
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <h3>Patients</h3>
-    <ul class="patient-list" id="patientList"></ul>
-    <div class="no-patients" id="noPatients">No saved patients</div>
-    <div class="sidebar-actions">
-      <button onclick="uiNewPatient()" title="New patient">+ New</button>
-      <button onclick="uiExport()" title="Download backup">⬇ Backup</button>
-      <button onclick="uiImport()" title="Restore from file">⬆ Restore</button>
-    </div>
-  </aside>
-
-  <!-- Main content -->
-  <main class="main">
-    <!-- Header -->
-    <div class="header">
-      <h1>PapCalc</h1>
-      <div class="header-actions">
-        <button onclick="uiSavePatient()">💾 Save</button>
-        <button onclick="uiShare()">🔗 Share</button>
-        <button onclick="App.startOver(); renderPatientList();">↻ Start Over</button>
-      </div>
-    </div>
-
-    <!-- Patient info panel -->
-    <div class="patient-panel" id="patientPanel">
-      <h3>Patient Information <span style="font-weight:400;font-size:.75rem;color:var(--muted)">(optional clinical context)</span></h3>
-      <div class="patient-grid">
-        <div class="patient-field">
-          <label>LMP</label>
-          <input type="date" id="pi-lmp" onchange="updatePatientInfo()">
-        </div>
-        <div class="patient-field">
-          <label>Gravida (G)</label>
-          <input type="number" id="pi-gravida" min="0" placeholder="G" onchange="updatePatientInfo()">
-        </div>
-        <div class="patient-field">
-          <label>Para (P)</label>
-          <input type="number" id="pi-para" min="0" placeholder="P" onchange="updatePatientInfo()">
-        </div>
-        <div class="patient-field">
-          <label>Lifetime Partners</label>
-          <input type="number" id="pi-lifetimePartners" min="0" onchange="updatePatientInfo()">
-        </div>
-        <div class="patient-field">
-          <label>Age First Intercourse</label>
-          <input type="number" id="pi-ageFirstIntercourse" min="0" max="99" onchange="updatePatientInfo()">
-        </div>
-        <div class="patient-field">
-          <label>Birth Control</label>
-          <select id="pi-birthControl" onchange="updatePatientInfo()">
-            <option value="">—</option>
-            <option>None</option>
-            <option>OCPs</option>
-            <option>IUD (hormonal)</option>
-            <option>IUD (copper)</option>
-            <option>Implant</option>
-            <option>Depo-Provera</option>
-            <option>Ring</option>
-            <option>Patch</option>
-            <option>Barrier</option>
-            <option>Tubal ligation</option>
-            <option>Partner vasectomy</option>
-          </select>
-        </div>
-        <div class="patient-field">
-          <label>HIV Status</label>
-          <select id="pi-hiv" onchange="updatePatientInfo()">
-            <option value="">—</option>
-            <option>Negative</option>
-            <option>Positive</option>
-            <option>Unknown</option>
-          </select>
-        </div>
-        <div class="patient-field patient-notes">
-          <label>Clinical Notes</label>
-          <textarea id="pi-clinicalNotes" placeholder="Free-text notes..." onchange="updatePatientInfo()"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- Steps indicator -->
-    <div class="steps" id="steps"></div>
-
-    <!-- Content area -->
-    <div id="content"></div>
-
-    <!-- Navigation -->
-    <div id="nav"></div>
-
-    <!-- Footer -->
-    <div class="footer">
-      Open-source 2019 ASCCP Risk-Based Management Consensus Guidelines implementation.
-      <a href="https://github.com/robbie-med/papcalc" target="_blank">GitHub</a>
-      &middot; Not medical advice. Clinical judgment required.
-    </div>
-  </main>
-</div>
-
-<!-- Share modal (hidden) -->
-<div class="modal-overlay" id="shareModal" style="display:none">
-  <div class="modal">
-    <h3>Share Patient Link</h3>
-    <p style="font-size:.85rem;color:var(--muted)">Copy this link to share the patient's algorithm state:</p>
-    <input type="text" id="shareUrl" readonly onclick="this.select()">
-    <div class="btn-row">
-      <button class="btn btn-secondary" onclick="document.getElementById('shareModal').style.display='none'">Close</button>
-      <button class="btn btn-primary" onclick="copyShareLink()">Copy Link</button>
-    </div>
+<header class="top">
+  <div class="wrap">
+    <h1>rhisk</h1>
+    <p>2019 ASCCP risk-based management of abnormal cervical screening</p>
   </div>
-</div>
+</header>
 
-<!-- Scripts -->
-<script src="js/engine.js"></script>
-<script src="js/data.js"></script>
-<script src="js/risk.js"></script>
-<script src="js/storage.js"></script>
+<main class="wrap layout">
+  <form id="form" class="form" onsubmit="return false"></form>
+  <aside class="side">
+    <div id="result" class="result" aria-live="polite"></div>
+    <button type="button" id="reset" class="reset">Start over</button>
+
+    <details>
+      <summary>Clinical action thresholds</summary>
+      <table class="thresholds">
+        <tr><td>Expedited treatment preferred</td><td>immediate ≥60%</td></tr>
+        <tr><td>Colposcopy or expedited treatment</td><td>immediate 25–60%</td></tr>
+        <tr><td>Colposcopy</td><td>immediate ≥4%</td></tr>
+        <tr><td>1-year return</td><td>immediate &lt;4%, 5-year ≥0.55%</td></tr>
+        <tr><td>3-year return</td><td>5-year 0.15–0.55%</td></tr>
+        <tr><td>5-year return</td><td>5-year &lt;0.15%</td></tr>
+      </table>
+      <p class="hint">Expedited treatment options apply only to nonpregnant patients 25 or older.</p>
+    </details>
+
+    <details>
+      <summary>Situations not covered by the calculator</summary>
+      <p><b>Unsatisfactory cytology</b> with negative, unknown or no HPV: repeat age-based screening in 2–4 months; HPV triage not recommended. Cotest with unsatisfactory cytology and HPV-positive (untyped): repeat cytology in 2–4 months or colposcopy; HPV 16/18-positive: colposcopy. Colposcopy after 2 consecutive unsatisfactory tests. (G.2, H.2)</p>
+      <p><b>After hysterectomy:</b> no vaginal screening unless CIN 2+ was diagnosed in the past 25 years. If hysterectomy was the treatment, get 3 consecutive annual HPV-based tests, then test every 3 years until 25 years after treatment. (K.4)</p>
+      <p><b>Symptomatic patients</b> (abnormal bleeding, a visibly abnormal cervix) need diagnostic evaluation, not screening algorithms.</p>
+      <p><b>Over 65</b> with prior abnormalities: manage as for ages 25–65. Stopping surveillance is unacceptable if the patient is in reasonably good health. (K.5)</p>
+      <p><b>Not yet included:</b> p16/Ki-67 dual-stain triage (2024), self-collected HPV samples (2024) and extended genotyping. See the ASCCP updates.</p>
+    </details>
+  </aside>
+</main>
+
+<footer class="wrap foot">
+  <p>Decision support only. It does not replace clinical judgment or the full guideline. It covers asymptomatic patients with a cervix.</p>
+  <p>Sources: Perkins RB et al. <a href="https://doi.org/10.1097/LGT.0000000000000525">2019 ASCCP risk-based management consensus guidelines</a>. J Low Genit Tract Dis 2020;24:102–31 ·
+  Egemen D et al. <a href="https://doi.org/10.1097/LGT.0000000000000529">Risk estimates supporting the 2019 ASCCP guidelines</a>. 2020;24:132–43 ·
+  Demarco M et al. <a href="https://doi.org/10.1097/LGT.0000000000000530">Partial HPV genotyping</a>. 2020;24:144–7.</p>
+  <p><a href="https://github.com/robbie-med/rhisk">Source on GitHub</a></p>
+</footer>
+
+<script src="js/guidelines.js"></script>
 <script src="js/app.js"></script>
-<script>
-// ===== UI Rendering =====
-
-function init() {
-  App.init();
-  renderPatientList();
-  render();
-}
-
-// ----- Render -----
-
-function render() {
-  const s = App.getState();
-  if (!s.page) { document.getElementById('content').innerHTML = '<div class="card"><p>Loading...</p></div>'; return; }
-
-  renderSteps();
-  renderContent();
-  renderNav();
-  updatePatientInfoFields();
-}
-
-function renderSteps() {
-  const el = document.getElementById('steps');
-  if (!App.getState().page || !App.getState().page.content) { el.innerHTML = ''; return; }
-
-  let html = '';
-  for (const item of App.getState().page.content) {
-    if (item.type === 'stop' || item.type === 'overlay' || item.type === 'title' || item.type === 'derived') continue;
-    let cls = 'step ';
-    if (item.value !== undefined && item.value !== '' && item.value !== null && item.value !== false) {
-      cls += 'step-' + (item.style || 'active');
-    } else {
-      cls += 'step-inactive';
-    }
-    html += `<div class="${cls}" title="${item.title || ''}">${item.title || ''}</div>`;
-  }
-  el.innerHTML = html;
-}
-
-function renderContent() {
-  const el = document.getElementById('content');
-  const page = App.getState().page;
-  if (!page) { el.innerHTML = ''; return; }
-
-  let html = '';
-
-  // Page title
-  if (page.title && page.type !== 'section') {
-    const algoName = App.getState().currentAlgoName || page.title;
-    html += `<div class="card"><h2 style="margin:0;font-size:1rem;color:var(--blue)">${algoName}</h2></div>`;
-  }
-
-  for (const item of page.content) {
-    switch (item.type) {
-      case 'segment': html += renderSegment(item); break;
-      case 'choice': html += renderChoice(item); break;
-      case 'radio': html += renderRadio(item); break;
-      case 'switch':
-      case 'checkboxes': html += renderSwitch(item); break;
-      case 'stop':
-      case 'overlay': html += renderStop(item); break;
-      case 'title': html += `<h2 class="card-title" style="padding:0 20px">${item.title}</h2>`; break;
-      case 'recommendation': html += renderRecommendation(item); break;
-      case 'collapse':
-      case 'collapse_segment': html += renderCollapse(item); break;
-      default:
-        if (item.text && item.text.length) {
-          html += `<div class="card"><div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div></div>`;
-        }
-    }
-  }
-  el.innerHTML = html;
-  attachEvents();
-}
-
-function renderSegment(item) {
-  const choices = item.choices.map(c => {
-    const sel = item.value === c.value ? ' selected' : '';
-    const dis = !c.enabled ? ' disabled' : '';
-    return `<button class="segment-btn${sel}"${dis} data-id="${item.id}" data-val="${c.value}">${c.text}</button>`;
-  }).join('');
-
-  return `<div class="card">
-    <div class="card-title">${item.title || ''}</div>
-    <div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>
-    <div class="segment-list">${choices}</div>
-  </div>`;
-}
-
-function renderChoice(item) {
-  const choices = item.choices.map(c => {
-    const sel = item.value === c.value ? ' selected' : '';
-    const dis = !c.enabled ? ' disabled' : '';
-    return `<button class="choice-btn${sel}"${dis} data-id="${item.id}" data-val="${c.value}">${c.text}</button>`;
-  }).join('');
-
-  return `<div class="card">
-    <div class="card-title">${item.title || ''}</div>
-    <div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>
-    <div class="choice-list">${choices}</div>
-  </div>`;
-}
-
-function renderRadio(item) {
-  let html = `<div class="card"><div class="card-title">${item.title || ''}</div>`;
-  if (item.text) html += `<div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>`;
-
-  if (item.groups) {
-    for (const group of item.groups) {
-      const choices = group.choices.map(c => {
-        const sel = group.value === c.value ? ' selected' : '';
-        const dis = !c.enabled ? ' disabled' : '';
-        return `<button class="segment-btn${sel}"${dis} data-id="${group.id}" data-val="${c.value}">${c.text}</button>`;
-      }).join('');
-      html += `<div class="segment-list" style="margin-bottom:8px">${choices}</div>`;
-    }
-  } else if (item.choices) {
-    html += `<div class="segment-list">${item.choices.map(c => {
-      const sel = item.value === c.value ? ' selected' : '';
-      const dis = !c.enabled ? ' disabled' : '';
-      return `<button class="segment-btn${sel}"${dis} data-id="${item.id}" data-val="${c.value}">${c.text}</button>`;
-    }).join('')}</div>`;
-  }
-  html += '</div>';
-  return html;
-}
-
-function renderSwitch(item) {
-  let html = `<div class="card"><div class="card-title">${item.title || ''}</div>`;
-  if (item.text) html += `<div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>`;
-
-  for (const c of item.choices) {
-    const checked = item.checked && item.checked.includes(c.value);
-    html += `<div class="switch-item">
-      <span class="switch-label">${c.text}</span>
-      <div class="switch-track${checked ? ' on' : ''}" data-id="${item.id}" data-val="${c.value}"></div>
-    </div>`;
-  }
-  html += '</div>';
-  return html;
-}
-
-function renderStop(item) {
-  return `<div class="stop-card">
-    <div class="stop-title">${item.title || 'Clinical Note'}</div>
-    <div>${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>
-  </div>`;
-}
-
-function renderCollapse(item) {
-  let html = `<div class="card">
-    <div class="card-title" style="cursor:pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-      ▶ ${item.title || 'Details'}
-    </div>
-    <div class="hidden" style="margin-top:8px">
-      <div class="card-text">${(Array.isArray(item.text) ? item.text.join('<br>') : (item.text || ''))}</div>`;
-  if (item.choices) {
-    html += `<div class="choice-list">${item.choices.map(c => {
-      return `<button class="choice-btn" data-id="${item.id}" data-val="${c.value}">${c.text}</button>`;
-    }).join('')}</div>`;
-  }
-  html += '</div></div>';
-  return html;
-}
-
-function renderRecommendation(item) {
-  const risk = parseFloat(item.risk) || 0;
-  let riskClass = 'low';
-  let iconClass = 'screening';
-  let iconEmoji = '📋';
-
-  if (item.style === 'colposcopy' || (item.text.join(' ').toLowerCase().includes('colposcopy'))) {
-    iconClass = 'colposcopy'; iconEmoji = '🔬';
-  } else if (item.style === 'treatment' || item.style === 'treated' || (item.text.join(' ').toLowerCase().includes('treatment') || item.text.join(' ').toLowerCase().includes('excision'))) {
-    iconClass = 'treatment'; iconEmoji = '⚕️';
-  } else if (item.text.join(' ').toLowerCase().includes('surveillance') || item.text.join(' ').toLowerCase().includes('follow')) {
-    iconClass = 'surveillance'; iconEmoji = '📅';
-  }
-
-  if (risk >= 25) riskClass = 'med';
-  if (risk >= 60) riskClass = 'high';
-  const riskWidth = Math.min(Math.max(risk * 2, 2), 100);
-
-  return `<div class="rec-card">
-    <div class="rec-header">
-      <div class="rec-icon ${iconClass}">${iconEmoji}</div>
-      <div>
-        <div class="rec-title">${item.title || 'Recommendation'}</div>
-        ${item.style ? `<div class="rec-subtitle">${item.style.replace('_', ' ')}</div>` : ''}
-      </div>
-    </div>
-    <div class="rec-text">${item.text.map(t => `<p>${t}</p>`).join('')}</div>
-    ${item.risk ? `
-    <div class="rec-risk">
-      <div class="rec-risk-label">Immediate risk of ${item.risk_of || 'CIN3+'}: <strong>${item.risk}%</strong></div>
-      <div class="rec-risk-bar">
-        <div class="rec-risk-fill ${riskClass}" style="width:${riskWidth}%"></div>
-        <div class="rec-risk-threshold t4" title="4% threshold"></div>
-        <div class="rec-risk-threshold t25" title="25% threshold"></div>
-        <div class="rec-risk-value">${item.risk}%</div>
-      </div>
-    </div>` : ''}
-    ${item.reference ? `<div class="rec-reference">${item.reference}</div>` : ''}
-  </div>`;
-}
-
-// ----- Events -----
-
-function attachEvents() {
-  document.querySelectorAll('.segment-btn, .choice-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      if (this.disabled) return;
-      App.setAnswer(this.dataset.id, this.dataset.val);
-    });
-  });
-
-  document.querySelectorAll('.switch-track').forEach(track => {
-    track.addEventListener('click', function() {
-      App.toggleSwitch(this.dataset.id, this.dataset.val);
-    });
-  });
-}
-
-function renderNav() {
-  const el = document.getElementById('nav');
-  const s = App.getState();
-  const canGoBack = s.history.length > 0;
-
-  let html = '<div class="nav-row">';
-  html += `<button class="btn btn-secondary" onclick="App.goBack();renderPatientList();" ${canGoBack ? '' : 'disabled'}>← Back</button>`;
-  html += `<button class="btn btn-primary" onclick="App.goNext();renderPatientList();">Next →</button>`;
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-// ----- Patient Info -----
-
-function updatePatientInfo() {
-  const s = App.getState();
-  s.patientInfo.lmp = document.getElementById('pi-lmp')?.value || '';
-  s.patientInfo.lifetimePartners = document.getElementById('pi-lifetimePartners')?.value || '';
-  s.patientInfo.ageFirstIntercourse = document.getElementById('pi-ageFirstIntercourse')?.value || '';
-  s.patientInfo.birthControl = document.getElementById('pi-birthControl')?.value || '';
-  s.patientInfo.gravida = document.getElementById('pi-gravida')?.value || '';
-  s.patientInfo.para = document.getElementById('pi-para')?.value || '';
-  s.patientInfo.hiv = document.getElementById('pi-hiv')?.value || '';
-  s.patientInfo.clinicalNotes = document.getElementById('pi-clinicalNotes')?.value || '';
-
-  // Auto-save
-  if (s.selectedPatientId) App.savePatient();
-}
-
-function updatePatientInfoFields() {
-  const pi = App.getState().patientInfo;
-  setField('pi-lmp', pi.lmp);
-  setField('pi-lifetimePartners', pi.lifetimePartners);
-  setField('pi-ageFirstIntercourse', pi.ageFirstIntercourse);
-  setField('pi-birthControl', pi.birthControl);
-  setField('pi-gravida', pi.gravida);
-  setField('pi-para', pi.para);
-  setField('pi-hiv', pi.hiv);
-  setField('pi-clinicalNotes', pi.clinicalNotes);
-}
-
-function setField(id, value) {
-  const el = document.getElementById(id);
-  if (el && el.value !== value) el.value = value || '';
-}
-
-// ----- Patient List -----
-
-function renderPatientList() {
-  const list = document.getElementById('patientList');
-  const noPatients = document.getElementById('noPatients');
-  const patients = Storage.getAll();
-  const selectedId = App.getState().selectedPatientId;
-
-  if (patients.length === 0) {
-    list.innerHTML = '';
-    noPatients.style.display = 'block';
-    return;
-  }
-  noPatients.style.display = 'none';
-
-  list.innerHTML = patients.map(p => {
-    const active = p.id === selectedId ? ' active' : '';
-    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '';
-    const label = p.algorithmName || p.diagnosis || 'New patient';
-    return `<li class="patient-item${active}" onclick="uiLoadPatient('${p.id}')">
-      <span class="name">${label}</span>
-      <span class="date">${date}</span>
-      <button class="del-btn" onclick="event.stopPropagation();uiDeletePatient('${p.id}')" title="Delete">✕</button>
-    </li>`;
-  }).join('');
-}
-
-// ----- UI Actions -----
-
-function uiSavePatient() {
-  App.savePatient();
-  renderPatientList();
-}
-
-function uiLoadPatient(id) {
-  App.loadPatient(id);
-  updatePatientInfoFields();
-  renderPatientList();
-}
-
-function uiDeletePatient(id) {
-  if (!confirm('Delete this patient record?')) return;
-  App.deletePatient(id);
-  updatePatientInfoFields();
-}
-
-function uiNewPatient() {
-  App.newPatient();
-  updatePatientInfoFields();
-  renderPatientList();
-}
-
-function uiExport() {
-  Storage.downloadBackup();
-}
-
-function uiImport() {
-  Storage.importFile(result => {
-    if (result.success) {
-      alert(`Imported ${result.count} patient(s).`);
-      App.getState().patients = Storage.getAll();
-      renderPatientList();
-    } else {
-      alert('Import failed: ' + result.error);
-    }
-  });
-}
-
-function uiShare() {
-  const s = App.getState();
-  const record = App.buildPatientRecord();
-  const link = Storage.generateShareLink({
-    algorithmName: s.currentAlgoFile,
-    age: s.patientAge,
-    results: Engine.getVars(),
-    notes: s.patientInfo.clinicalNotes,
-  });
-
-  document.getElementById('shareUrl').value = link || '(could not generate link)';
-  document.getElementById('shareModal').style.display = 'flex';
-}
-
-function copyShareLink() {
-  const input = document.getElementById('shareUrl');
-  input.select();
-  document.execCommand('copy');
-  alert('Link copied!');
-}
-
-// ----- Init -----
-window.addEventListener('DOMContentLoaded', init);
-</script>
 </body>
 </html>

@@ -1,262 +1,149 @@
-// papcalc — main application controller
-const App = (function() {
-  // State
-  let state = {
-    page: null,
-    currentState: 'intro',
-    history: [],
-    currentAlgoFile: null,
-    currentAlgoName: null,
-    diagnosis: null,
-    patientAge: null,
-    patients: [],
-    selectedPatientId: null,
-    // Extended patient info
-    patientInfo: {
-      lmp: '',
-      lifetimePartners: '',
-      ageFirstIntercourse: '',
-      birthControl: '',
-      gravida: '',
-      para: '',
-      hiv: '',
-      clinicalNotes: '',
+// rhisk — UI. All clinical logic lives in guidelines.js (manage()).
+const state = { age: '25+' };
+
+const HPV_SCREEN = [['neg', 'Negative'], ['pos', 'Positive', 'other / untyped'], ['16', 'HPV 16+'], ['18', 'HPV 18+'], ['none', 'Not done']];
+const HPV_BASIC = [['neg', 'Negative'], ['pos', 'Positive'], ['none', 'Not done']];
+const CYTO = [['nilm', 'NILM'], ['ascus', 'ASC-US'], ['lsil', 'LSIL'], ['asch', 'ASC-H'], ['agc', 'AGC'], ['hsil', 'HSIL+']];
+const CYTO_NONE = ['none', 'Not done', 'HPV test only'];
+
+function fields(s) {
+  const f = [
+    { key: 'age', label: 'Age', options: [['25+', '25 or older'], ['u25', 'Under 25']] },
+    { key: 'situation', label: 'Clinical situation', options: [
+      ['screen', 'Screening result'],
+      ['biopsy', 'Colposcopy biopsy result'],
+      ['postcolpo', 'Follow-up after colposcopy', 'biopsy <CIN 2'],
+      ['posttx', 'Follow-up after treatment', 'treated CIN 2 / CIN 3']] },
+  ];
+  const cyto = withNone => ({ key: 'cyto', label: 'Current cytology', options: withNone ? CYTO.concat([CYTO_NONE]) : CYTO });
+
+  if (s.situation === 'screen' && s.age !== 'u25') {
+    f.push({ key: 'history', label: 'Most recent prior HPV result', hint: 'Within ~5 years. A prior negative cytology alone does not count.', options: [
+      ['unknown', 'None on record'], ['hpvneg', 'HPV-negative', 'or negative cotest'],
+      ['hpvneg_ascus', 'HPV-negative ASC-US'], ['hpvneg_lsil', 'HPV-negative LSIL'], ['hpvpos_nilm', 'HPV-positive NILM']] });
+    f.push({ key: 'hpv', label: 'Current HPV', options: HPV_SCREEN });
+    f.push(cyto(s.hpv && s.hpv !== 'none'));
+  } else if (s.situation === 'screen') {
+    f.push({ key: 'visit', label: 'This result is', options: [
+      ['initial', 'A new result'], ['y1', '1-year repeat', 'after ASC-US/LSIL'], ['y2', '2-year repeat', 'after ASC-US/LSIL']] });
+    f.push(cyto(false));
+    if (s.cyto === 'ascus' && s.visit === 'initial') f.push({ key: 'hpv', label: 'Reflex HPV', options: HPV_BASIC });
+  } else if (s.situation === 'biopsy') {
+    f.push({ key: 'biopsy', label: 'Biopsy result', options: [
+      ['neg', '<CIN 1', 'normal'], ['cin1', 'CIN 1', 'LSIL'], ['cin2', 'CIN 2'], ['cin3', 'CIN 3'],
+      ['hsil_nos', 'HSIL', 'CIN 2 vs 3 not specified'], ['ais', 'AIS'], ['cancer', 'Cancer']] });
+    if (s.biopsy === 'neg' || s.biopsy === 'cin1') f.push({ key: 'referral', label: 'Result that led to colposcopy', options: [
+      ['nilm', 'HPV+ NILM', 'persistent, or HPV 16/18'], ['ascus', 'ASC-US', 'HPV+'], ['lsil', 'LSIL'],
+      ['asch', 'ASC-H'], ['agc', 'AGC'], ['hsil', 'HSIL']] });
+  } else if (s.situation === 'postcolpo') {
+    f.push({ key: 'grade', label: 'Result that led to colposcopy', options: [
+      ['low', 'Low-grade', 'HPV+ NILM, ASC-US, LSIL'], ['high', 'High-grade', 'ASC-H, AGC, HSIL']] });
+    if (s.age !== 'u25') f.push({ key: 'hpv', label: 'Current HPV', options: HPV_BASIC });
+    f.push(cyto(s.age !== 'u25' && s.hpv && s.hpv !== 'none'));
+  } else if (s.situation === 'posttx') {
+    f.push({ key: 'priorNeg', label: 'Negative HPV-based tests since treatment', options: [
+      ['0', 'None yet', 'first follow-up'], ['1', 'One'], ['2', 'Two or more']] });
+    f.push({ key: 'hpv', label: 'Current HPV', options: HPV_BASIC });
+    f.push(cyto(s.hpv && s.hpv !== 'none'));
+  }
+  if (s.situation) f.push({ key: 'flags', label: 'Modifiers', multi: true, options: [['pregnant', 'Pregnant'], ['immuno', 'Immunosuppressed', 'incl. HIV']] });
+  return f;
+}
+
+// Drop answers that no longer apply (e.g. HPV 16 carried over from another situation).
+function prune() {
+  for (let pass = 0; pass < 4; pass++) {
+    const visible = fields(state);
+    const allowed = {};
+    for (const fd of visible) allowed[fd.key] = fd.options.map(o => o[0]);
+    let changed = false;
+    for (const k of Object.keys(state)) {
+      if (k === 'pregnant' || k === 'immuno') { if (!allowed.flags) { delete state[k]; changed = true; } continue; }
+      if (!allowed[k] || !allowed[k].includes(state[k])) { delete state[k]; changed = true; }
     }
-  };
-
-  // ----- Navigation -----
-
-  function init() {
-    // Load patients
-    state.patients = Storage.getAll();
-
-    // Check for share link
-    const shared = Storage.parseShareLink();
-    if (shared) {
-      loadSharedData(shared);
-      return;
-    }
-
-    // Load saved patient if any
-    if (state.selectedPatientId) {
-      const saved = Storage.getById(state.selectedPatientId);
-      if (saved) restoreSession(saved);
-    }
-
-    // Start with global algorithm
-    Engine.setAlgorithm(ALGORITHM_DATA['global']);
-    gotoState('intro');
+    if (!changed) return visible;
   }
+  return fields(state);
+}
 
-  function loadSharedData(shared) {
-    if (shared.d) {
-      const algo = ALGORITHMS.find(a => a.algorithm === shared.d || a.diagnosis === shared.d);
-      if (algo) {
-        loadAlgorithm(algo.algorithm || algo.filename, algo.diagnosis);
-        if (shared.a) Engine.setVariable('patient_age', shared.a);
-        if (shared.r) {
-          for (const [k, v] of Object.entries(shared.r)) {
-            Engine.setVariable(k, v);
-          }
-        }
-        if (shared.n) state.patientInfo.clinicalNotes = shared.n;
-        gotoState('confirmation');
-        return;
-      }
-    }
-    // Fallback to normal start
-    Engine.setAlgorithm(ALGORITHM_DATA['global']);
-    gotoState('intro');
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function renderForm(visible) {
+  document.getElementById('form').innerHTML = visible.map(fd => `
+    <fieldset>
+      <legend>${fd.label}</legend>
+      ${fd.hint ? `<p class="hint">${fd.hint}</p>` : ''}
+      <div class="opts">${fd.options.map(([v, label, sub]) => {
+        const checked = fd.multi ? state[v] : state[fd.key] === v;
+        return `<label class="opt"><input type="${fd.multi ? 'checkbox' : 'radio'}" name="${fd.key}" value="${v}"${checked ? ' checked' : ''}>
+          <span>${esc(label)}${sub ? `<small>${esc(sub)}</small>` : ''}</span></label>`;
+      }).join('')}</div>
+    </fieldset>`).join('');
+}
+
+const fmt = v => v === null || v === undefined ? '—' : v + '%';
+
+function renderResult(visible) {
+  const r = manage(state);
+  const el = document.getElementById('result');
+  if (r.level === 'need') {
+    el.className = 'result need';
+    el.innerHTML = `<p class="prompt">${esc(r.title)}</p>${r.details.map(d => `<p class="hint">${esc(d)}</p>`).join('')}`;
+    return;
   }
+  const risk = r.risk || {};
+  const hasNums = risk.imm != null || risk.five != null;
+  el.className = 'result ' + r.level;
+  el.innerHTML = `
+    <div class="action"><span class="eyebrow">Recommendation</span><h2>${esc(r.title)}</h2></div>
+    ${hasNums ? `<div class="risks">
+      <div><span class="num">${fmt(risk.imm)}</span><span class="lbl">${risk.immLabel || 'Immediate'} CIN 3+ risk</span></div>
+      <div><span class="num">${fmt(risk.five)}</span><span class="lbl">5-year CIN 3+ risk</span></div>
+    </div>` : ''}
+    ${r.details.length ? `<ul class="details">${r.details.map(d => `<li>${esc(d)}</li>`).join('')}</ul>` : ''}
+    ${risk.source ? `<p class="source">${esc(risk.source)}</p>` : ''}
+    <button type="button" id="copy" class="copy">Copy summary</button>`;
+  document.getElementById('copy').onclick = () => copySummary(visible, r);
+}
 
-  function gotoState(s) {
-    state.currentState = s;
-    state.page = Engine.reevaluate(s);
+function copySummary(visible, r) {
+  const parts = visible.map(fd => {
+    if (fd.multi) { const on = fd.options.filter(o => state[o[0]]).map(o => o[1]); return on.length ? on.join(', ') : null; }
+    const o = fd.options.find(o => o[0] === state[fd.key]);
+    return o ? `${fd.label}: ${o[1]}` : null;
+  }).filter(Boolean);
+  const risk = r.risk || {};
+  const lines = [
+    'Cervical screening management (2019 ASCCP risk-based guidelines)',
+    parts.join('; '),
+    'Recommendation: ' + r.title,
+  ];
+  if (risk.imm != null || risk.five != null)
+    lines.push(`CIN 3+ risk: ${risk.immLabel || 'immediate'} ${fmt(risk.imm)}, 5-year ${fmt(risk.five)}`);
+  if (risk.source) lines.push('Source: ' + risk.source);
+  const btn = document.getElementById('copy');
+  navigator.clipboard.writeText(lines.join('\n')).then(
+    () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy summary'; }, 1500); },
+    () => { btn.textContent = 'Copy failed'; });
+}
 
-    // If no recommendation from engine, compute locally using risk tables
-    if (s === 'recommendation' && state.currentAlgoFile) {
-      const hasRecommendation = state.page.content.some(
-        c => c.type === 'recommendation' && c.risk
-      );
-      if (!hasRecommendation && typeof RiskCalculator !== 'undefined') {
-        const vars = Engine.getVars();
-        const rec = RiskCalculator.generateRecommendation(vars);
-        if (rec && rec.risk) {
-          // Replace the no-recommendation overlay with actual risk data
-          state.page.content = [rec];
-        }
-      }
-    }
+function render() {
+  const visible = prune();
+  renderForm(visible);
+  renderResult(visible);
+}
 
-    if (typeof render === 'function') render();
-    if (typeof window !== 'undefined') window.scrollTo(0, 0);
-  }
+document.getElementById('form').addEventListener('change', e => {
+  const t = e.target;
+  if (t.type === 'checkbox') state[t.value] = t.checked || undefined;
+  else state[t.name] = t.value;
+  render();
+});
 
-  function goBack() {
-    if (state.history.length === 0) return;
-    const prev = state.history.pop();
-    state.currentState = prev.currentState;
-    state.page = prev.page;
-    if (typeof render === 'function') render();
-  }
+document.getElementById('reset').addEventListener('click', () => {
+  for (const k of Object.keys(state)) delete state[k];
+  state.age = '25+';
+  render();
+});
 
-  function goNext() {
-    // If on global intro and we have diagnosis/age, load the specific algorithm
-    if (!state.currentAlgoFile) {
-      const diagnosis = Engine.getVariable('diagnosis');
-      const patientAge = Engine.getVariable('patient_age');
-
-      if (diagnosis && patientAge && diagnosis !== true) {
-        const match = ALGORITHMS.find(a =>
-          a.name === diagnosis || a.diagnosis === diagnosis || a.title === diagnosis
-        );
-        if (match && match.filename) {
-          loadAlgorithm(match.filename, match.diagnosis || match.name);
-          return;
-        }
-        const dmatch = DIAGNOSES.find(d =>
-          d.name === diagnosis || d.title === diagnosis
-        );
-        if (dmatch && dmatch.filename) {
-          loadAlgorithm(dmatch.filename, dmatch.name);
-          return;
-        }
-      }
-    }
-
-    state.history.push({ currentState: state.currentState, page: state.page });
-
-    if (state.currentState === 'intro') {
-      gotoState('confirmation');
-    } else if (state.currentState === 'confirmation') {
-      gotoState('recommendation');
-    } else {
-      gotoState('recommendation');
-    }
-  }
-
-  function loadAlgorithm(filename, diagnosisName) {
-    state.currentAlgoFile = filename;
-    state.currentAlgoName = diagnosisName;
-    const data = ALGORITHM_DATA[filename];
-    if (data) {
-      Engine.setAlgorithm(data);
-      Engine.setVariable('diagnosis', diagnosisName || '');
-      Engine.setVariable('patient_age', state.patientAge || '');
-      gotoState('intro');
-    }
-  }
-
-  function startOver() {
-    state.history = [];
-    state.currentAlgoFile = null;
-    state.currentAlgoName = null;
-    Engine.reset();
-    Engine.setAlgorithm(ALGORITHM_DATA['global']);
-    gotoState('intro');
-  }
-
-  function setAnswer(id, value) {
-    Engine.setVariable(id, value);
-    if (id === '_patient_age') state.patientAge = value;
-    if (id === 'clinical_situation') state.diagnosis = value;
-    // Re-evaluate current state to update derived vars and visibility
-    state.page = Engine.reevaluate(state.currentState);
-    autoSave();
-    if (typeof render === 'function') render();
-  }
-
-  function toggleSwitch(id, value) {
-    const subKey = id + '_' + value;
-    const currentVal = Engine.getVariable(subKey);
-    Engine.setVariable(subKey, !currentVal);
-    autoSave();
-    if (typeof render === 'function') render();
-  }
-
-  // ----- Persistence -----
-
-  function autoSave() {
-    if (!state.selectedPatientId) return;
-    const record = buildPatientRecord();
-    Storage.save(record);
-  }
-
-  function buildPatientRecord() {
-    return {
-      id: state.selectedPatientId,
-      algorithmFile: state.currentAlgoFile,
-      algorithmName: state.currentAlgoName,
-      age: state.patientAge,
-      diagnosis: state.diagnosis,
-      variables: Engine.getVars(),
-      currentState: state.currentState,
-      patientInfo: { ...state.patientInfo },
-      page: state.page,
-    };
-  }
-
-  function savePatient() {
-    const record = buildPatientRecord();
-    if (!state.selectedPatientId) {
-      state.selectedPatientId = record.id || Storage.generateId();
-      record.id = state.selectedPatientId;
-    }
-    Storage.save(record);
-    state.patients = Storage.getAll();
-    renderPatientList();
-    return record;
-  }
-
-  function loadPatient(id) {
-    const record = Storage.getById(id);
-    if (!record) return;
-    restoreSession(record);
-  }
-
-  function restoreSession(record) {
-    state.selectedPatientId = record.id;
-    state.currentAlgoFile = record.algorithmFile;
-    state.currentAlgoName = record.algorithmName;
-    state.patientAge = record.age;
-    state.diagnosis = record.diagnosis;
-    state.patientInfo = record.patientInfo || { lmp:'',lifetimePartners:'',ageFirstIntercourse:'',birthControl:'',gravida:'',para:'',hiv:'',clinicalNotes:'' };
-    state.currentState = record.currentState || 'intro';
-
-    if (record.algorithmFile && ALGORITHM_DATA[record.algorithmFile]) {
-      Engine.setAlgorithm(ALGORITHM_DATA[record.algorithmFile]);
-    } else {
-      Engine.setAlgorithm(ALGORITHM_DATA['global']);
-    }
-    if (record.variables) Engine.setVars(record.variables);
-
-    state.page = Engine.reevaluate(state.currentState);
-    if (typeof render === 'function') render();
-  }
-
-  function deletePatient(id) {
-    Storage.remove(id);
-    state.patients = Storage.getAll();
-    if (state.selectedPatientId === id) {
-      state.selectedPatientId = null;
-      startOver();
-    }
-    renderPatientList();
-  }
-
-  function newPatient() {
-    state.selectedPatientId = null;
-    state.patientInfo = { lmp:'',lifetimePartners:'',ageFirstIntercourse:'',birthControl:'',gravida:'',para:'',hiv:'',clinicalNotes:'' };
-    startOver();
-  }
-
-  // ----- UI Rendering (called by app.js which handles DOM) -----
-
-  function getState() { return state; }
-
-  return {
-    init, gotoState, goBack, goNext, startOver, setAnswer, toggleSwitch,
-    savePatient, loadPatient, deletePatient, newPatient,
-    getState, buildPatientRecord,
-  };
-})();
+render();
